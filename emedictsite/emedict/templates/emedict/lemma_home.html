@@ -1,0 +1,20 @@
+{% if lemmalist %}
+<form action="{% url 'emedict:home_filter' %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        {% for pos in poslist %}
+        <input type="checkbox" name="pos{{ forloop.counter }}" id="pos{{ forloop.counter }}" value="{{ pos }}">
+        <label for="pos{{ forloop.counter }}">{{ pos }}</label><br>
+        {% endfor %}
+    </fieldset>
+    <input type="submit" value="Filter POS">
+</form>
+    <ul>
+    {% for lemma in lemmalist %}
+        <li><a href="{% url 'emedict:lemma' lemma.oid %}">{{ lemma.cf }}</a> ({{lemma.pos}}, {{ lemma.lemmaspelling_set.first }}): {{ lemma.lemmadef_set.first }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No lemmata are available.</p>
+{% endif %}

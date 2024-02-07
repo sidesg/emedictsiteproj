@@ -1,0 +1,30 @@
+{% if lemma %}
+<h1>{{ lemma.cf }}</h1>
+<p><a href="{% url 'emedict:lemma_home' %}">Home</a></p>
+<p>{{ lemma.cf }} ({{ lemma.pos }}): <a href="http://oracc.iaas.upenn.edu/epsd2/cbd/sux/{{oid}}.html">{{oid}}</a></p>
+<h2>Definitions</h2>
+<ul>
+    {% for d in lemma.lemmadef_set.all %}
+    <li>{{ d.definition }}</a></li>
+    {% endfor %}
+</ul>
+<h2>Spellings</h2>
+<ul>
+    {% for s in lemma.lemmaspelling_set.all %}
+    <li>{{ s.spelling_lat }}</a></li>
+    {% endfor %}
+</ul>
+<form action="{% url 'emedict:lpos' lemma.oid %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        {% for choice in lemma.POS %}
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice }}">
+        <label for="choice{{ forloop.counter }}">{{ choice }}</label><br>
+        {% endfor %}
+    </fieldset>
+    <input type="submit" value="Change POS">
+</form>
+{% else %}
+<p>No lemmata are available.</p>
+{% endif %}
