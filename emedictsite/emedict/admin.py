@@ -4,6 +4,6 @@ from .models import *
 
 admin.site.register(Lemma)
 admin.site.register(LemmaDef)
-admin.site.register(Tag)
-admin.site.register(LemmaTag)
 admin.site.register(LemmaSpelling)
+admin.site.register(GrammarTag)
+admin.site.register(ContentTag)

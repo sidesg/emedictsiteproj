@@ -33,15 +33,31 @@ class LemmaSpelling(models.Model):
     def __str__(self) -> str:
         return self.spelling_lat
 
-class Tag(models.Model):
-    term = models.TextField()
+class GrammarTag(models.Model):
+    term = models.CharField(max_length=200)
+    definition = models.TextField(default="")
+    
+    def __str__(self) -> str:
+        return self.term
+    
+class ContentTag(models.Model):
+    term = models.CharField(max_length=200)
+    definition = models.TextField(default="")
     
     def __str__(self) -> str:
         return self.term
 
-class LemmaTag(models.Model):
+class LemmaGTag(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tag = models.ForeignKey(GrammarTag, on_delete=models.CASCADE)
+    citation = models.TextField()
+
+    def __str__(self) -> str:
+        return self.lemma.cf + ": " + self.tag.term
+
+class LemmaCTag(models.Model):
+    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
+    tag = models.ForeignKey(ContentTag, on_delete=models.CASCADE)
     citation = models.TextField()
 
     def __str__(self) -> str:

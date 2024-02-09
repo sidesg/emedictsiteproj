@@ -6,7 +6,7 @@ from .models import Lemma, LemmaDef, LemmaSpelling
 
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    return render(request, "emedict/emedict.html")
 
 def lemma_home(request):
     lemmalist = Lemma.objects.order_by("cf")
@@ -50,3 +50,6 @@ def lpos(request, oid):
         oid = "o" + str(lemma.oid).zfill(7)
 
         return HttpResponseRedirect(reverse("emedict:lemma", args=(lemma.oid,)))
+
+def tags(request):
+    ...

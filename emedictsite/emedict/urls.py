@@ -8,5 +8,6 @@ urlpatterns = [
     path("lemma/", views.lemma_home, name="lemma_home"),
     path("lemma/pos", views.home_filter, name="home_filter"),
     path("lemma/<int:oid>/", views.lemma_id, name="lemma"),
-    path("lemma/<int:oid>/pos", views.lpos, name="lpos")
+    path("lemma/<int:oid>/pos", views.lpos, name="lpos"),
+    path("tags", views.tags, name="tags_home")
 ]
