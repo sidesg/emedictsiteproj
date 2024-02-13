@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 
-from .models import Lemma, LemmaDef, LemmaSpelling
+from .models import Lemma
 
 
 def index(request):
@@ -16,7 +16,7 @@ def lemma_home(request):
     }
     return render(request, "emedict/lemma_home.html", context)
 
-def home_filter(request):
+def lemma_filter(request):
     return HttpResponse([i for i in request.POST.items()][1:])
 
 def lemma_id(request, oid):
@@ -52,4 +52,7 @@ def lpos(request, oid):
         return HttpResponseRedirect(reverse("emedict:lemma", args=(lemma.oid,)))
 
 def tags(request):
+    ...
+
+def tag_id(reques, pk):
     ...

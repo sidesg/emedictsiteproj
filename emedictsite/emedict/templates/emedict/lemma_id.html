@@ -5,15 +5,24 @@
 <h2>Definitions</h2>
 <ul>
     {% for d in lemma.lemmadef_set.all %}
-    <li>{{ d.definition }}</a></li>
+    <li>{{ d.definition }}</li>
     {% endfor %}
 </ul>
 <h2>Spellings</h2>
 <ul>
     {% for s in lemma.lemmaspelling_set.all %}
-    <li>{{ s.spelling_lat }}</a></li>
+    <li>{{ s.spelling_lat }}</li>
     {% endfor %}
 </ul>
+{% if lemma.lemmactag_set.all %}
+<h2>Tags</h2>
+<ul>
+    {% for tag in lemma.lemmactag_set.all %}
+    <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.tag }}</a> ({{ tag.pk }}) {{ tag.citation }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <form action="{% url 'emedict:lpos' lemma.oid %}" method="post">
     {% csrf_token %}
     <fieldset>

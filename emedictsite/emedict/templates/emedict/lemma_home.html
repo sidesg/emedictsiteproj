@@ -1,5 +1,5 @@
 {% if lemmalist %}
-<form action="{% url 'emedict:home_filter' %}" method="post">
+<form action="{% url 'emedict:lemma_filter' %}" method="post">
     {% csrf_token %}
     <fieldset>
         {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
