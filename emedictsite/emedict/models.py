@@ -1,14 +1,12 @@
 from django.db import models
 
-class GrammarTag(models.Model):
+class Tag(models.Model):
+    TAGTS = {
+        "GR": "Grammar",
+        "CO": "Content"
+    }
     term = models.CharField(max_length=200)
-    definition = models.TextField(blank=True)
-    
-    def __str__(self) -> str:
-        return self.term
-    
-class ContentTag(models.Model):
-    term = models.CharField(max_length=200)
+    type = models.CharField(choices=TAGTS, max_length=200)
     definition = models.TextField(blank=True)
     
     def __str__(self) -> str:
@@ -28,9 +26,7 @@ class Lemma(models.Model):
     cf = models.CharField(max_length=200)
     pos = models.CharField(choices=POS, max_length=200)
     notes = models.TextField(blank=True)
-
-    grammartags = models.ManyToManyField(GrammarTag, through="LemmaGTag")
-    contenttags = models.ManyToManyField(ContentTag, through="LemmaCTag")
+    tags = models.ManyToManyField(Tag, through="LemmaTag")
 
     def __str__(self) -> str:
         return self.cf
@@ -49,18 +45,10 @@ class LemmaSpelling(models.Model):
 
     def __str__(self) -> str:
         return self.spelling_lat
-        
-class LemmaGTag(models.Model):
+    
+class LemmaTag(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
-    tag = models.ForeignKey(GrammarTag, on_delete=models.CASCADE)
-    citation = models.TextField(blank=True)
-
-    def __str__(self) -> str:
-        return self.lemma.cf + ": " + self.tag.term
-
-class LemmaCTag(models.Model):
-    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
-    tag = models.ForeignKey(ContentTag, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     citation = models.TextField(blank=True)
 
     def __str__(self) -> str:

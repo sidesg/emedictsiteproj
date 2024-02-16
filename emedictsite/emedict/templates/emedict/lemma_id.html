@@ -8,22 +8,27 @@
     <li>{{ d.definition }}</li>
     {% endfor %}
 </ul>
+<form>
+    {{ adddef }}
+    <input type="submit" value="Add Definition">
+</form>
+
 <h2>Spellings</h2>
 <ul>
     {% for s in lemma.lemmaspelling_set.all %}
     <li>{{ s.spelling_lat }}</li>
     {% endfor %}
 </ul>
-{% if lemma.lemmactag_set.all %}
+{% if lemma.lemmatag_set.all %}
 <h2>Tags</h2>
 <ul>
-    {% for tag in lemma.lemmactag_set.all %}
-    <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.tag }}</a> ({{ tag.pk }}) {{ tag.citation }}</li>
+    {% for tag in lemma.lemmatag_set.all %}
+    <li><a href="{% url 'emedict:tag_id' tag.tag.id %}">{{ tag.tag }}</a> ({{ tag.tag.id }}) {{ tag.citation }}</li>
     {% endfor %}
 </ul>
 {% endif %}
 
-<form action="{% url 'emedict:lpos' lemma.oid %}" method="post">
+<form action="{% url 'emedict:lpos' lemma.pk %}" method="post">
     {% csrf_token %}
     <fieldset>
         {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}

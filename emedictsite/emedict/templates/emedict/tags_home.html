@@ -1,0 +1,11 @@
+<p><a href="{% url 'emedict:index' %}">Home</a></p>
+<ul>
+    {% for tag in ctags %}
+    <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
+    {% endfor %}
+</ul>
+<ul>
+    {% for tag in gtags %}
+    <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
+    {% endfor %}
+</ul>
