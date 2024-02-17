@@ -24,6 +24,10 @@ def add_data(apps, schema_editor):
         data = json.load(infile)["entries"]
 
     for l in data:
+        oid = int(l["oid"][1:])
+
+        if Lemma.objects.filter(oid=oid):
+            continue
 
         newl = Lemma(
             oid=int(l["oid"][1:]),

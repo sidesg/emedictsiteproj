@@ -1,0 +1,18 @@
+{% if tag %}
+<p><a href="{% url 'emedict:tags_home' %}">Home</a></p>
+<h1>{{ tag.term }}</h1>
+<p>{{ tag.term }}: {{ tag.definition }}</p>
+
+{% if lemmata %}
+<h2>Lemmata</h2>
+<ul>
+    {% for l in lemmata %}
+    <li><a href="{% url 'emedict:lemma' l.pk %}">{{ l }}</a>: {{ l.lemmadef_set.first }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% else %}
+<p>No tag are available.</p>
+
+{% endif %}
