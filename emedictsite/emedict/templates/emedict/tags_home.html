@@ -9,3 +9,13 @@
     <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
     {% endfor %}
 </ul>
+<ul>
+    {% for tag in stags %}
+    <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
+    {% endfor %}
+</ul>
+<ul>
+    {% for tag in wtags %}
+    <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
+    {% endfor %}
+</ul>

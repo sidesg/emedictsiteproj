@@ -1,20 +1,31 @@
 {% if lemmalist %}
-<form action="{% url 'emedict:lemma_filter' %}" method="post">
+<a href="{% url 'emedict:index' %}">Home</a>
+<form action="{% url 'emedict:lemma_initial' %}" method="post">
     {% csrf_token %}
     <fieldset>
-        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-        {% for pos in poslist %}
-        <input type="checkbox" name="pos{{ forloop.counter }}" id="pos{{ forloop.counter }}" value="{{ pos }}">
-        <label for="pos{{ forloop.counter }}">{{ pos }}</label><br>
+        {% for letter in letters %}
+        <input type="radio" name="letter" id="choice{{ letter }}" value="{{ letter }}">
+        <label for="choice{{ letter }}">{{ letter }}</label> |
         {% endfor %}
     </fieldset>
-    <input type="submit" value="Filter POS">
+    <input type="submit" value="Initial letter">
 </form>
-    <ul>
+<ul>
     {% for lemma in lemmalist %}
-        <li><a href="{% url 'emedict:lemma' lemma.pk %}">{{ lemma.cf }}</a> ({{lemma.pos}}, {{ lemma.lemmaspelling_set.first }}): {{ lemma.lemmadef_set.first }}</li>
+    <li><a href="{% url 'emedict:lemma' lemma.pk %}">{{ lemma.cf }}</a> ({{lemma.pos}}, {{ lemma.lemmaspelling_set.first }}): {{ lemma.lemmadef_set.first }}</li>
     {% endfor %}
-    </ul>
+</ul>
 {% else %}
-    <p>No lemmata are available.</p>
+<a href="{% url 'emedict:index' %}">Home</a>
+<form action="{% url 'emedict:lemma_initial' %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+        {% for letter in letters %}
+        <input type="radio" name="letter" id="choice{{ letter }}" value="{{ letter }}">
+        <label for="choice{{ letter }}">{{ letter }}</label> |
+        {% endfor %}
+    </fieldset>
+    <input type="submit" value="Initial letter">
+</form>
+<p>No lemmata are available.</p>
 {% endif %}

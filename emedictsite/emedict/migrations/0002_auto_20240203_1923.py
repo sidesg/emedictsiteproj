@@ -2,59 +2,91 @@
 
 from django.db import migrations
 
-import json
 import re
+import json
+import polars as pl
 
-def add_data(apps, schema_editor):
-    datapath = "emedict/migrations/data/gloss-sux.json"
-
-    posdict = {
-        "N": "N",
-        "V/t": "V",
-        "V/i": "V",
-        "AJ": "ADJ",    
-        "CNJ": "CNJ"
-    }
-
-    Lemma = apps.get_model("emedict", "Lemma")
-    LemmaDef = apps.get_model("emedict", "LemmaDef")
-    LemmaSpelling = apps.get_model("emedict", "LemmaSpelling")
-
+def load_data(datapath: str = "emedict/migrations/data/gloss-sux-full.json") -> list[dict]:
     with open(datapath, "r", encoding="utf8") as infile:
         data = json.load(infile)["entries"]
 
-    for l in data:
-        oid = int(l["oid"][1:])
+    return data
 
-        if Lemma.objects.filter(oid=oid):
-            continue
+def load_posmap(datapath: str) -> dict:
+    df = pl.read_csv(datapath, columns=["epsd_abbr", "emepos_abbr"])
 
-        newl = Lemma(
-            oid=int(l["oid"][1:]),
-            cf=l["cf"],
-            pos=posdict.get(l["pos"], "O")
+    return dict(zip(df['epsd_abbr'], df['emepos_abbr']))
+
+def add_data(apps, schema_editor):
+    Lemma = apps.get_model("emedict", "Lemma")
+    LemmaDef = apps.get_model("emedict", "LemmaDef")
+    LemmaSpelling = apps.get_model("emedict", "LemmaSpelling")
+    Tag = apps.get_model("emedict", "Tag")
+    Pos = apps.get_model("emedict", "Pos")
+
+    #Create tags
+    tagdata = pl.read_csv("emedict/migrations/data/tags.csv")
+    for dftag in tagdata.iter_rows(named=True):
+        new_tag = Tag(
+            term=dftag["tag"],
+            type=dftag["type"]
         )
 
-        newl.save()
+        new_tag.save()
 
-        for sense in l["senses"]:
-            s = sense["mng"]
-            newd = LemmaDef(
-                lemma=newl,
-                definition=s
+    #Create POS
+    posdata = pl.read_csv("emedict/migrations/data/pos_defs.csv")
+    for dfpos in posdata.iter_rows(named=True):
+        new_pos = Pos(
+            abbr = dfpos["abbr"],
+            term = dfpos["term"],
+            type = dfpos["type"]
+        )
+
+        new_pos.save()
+
+    #Create Lemmata
+    data = load_data()
+    posmap = load_posmap("emedict/migrations/data/pos_map.csv")
+    for l in data:
+        oid = l.get('oid', "no oid")
+        try:
+            newl = Lemma(
+                oid=l.get("oid", "None"),
+                cf=l["cf"],
+                pos=Pos.objects.get(abbr=posmap.get(l["pos"], "O"))
             )
-            newd.save()
 
-        for base in l["bases"]:
-            b = base["n"]
-            b = re.sub(r"%sux:", "", b) 
+            newl.save()
+        except:
+            print(f"Error {l['cf']}, {oid}: oid/cf/pos")
+        
+        try:
+            if senses := l["senses"]:
+                for sense in senses:
+                    s = sense["mng"]
+                    newd = LemmaDef(
+                        lemma=newl,
+                        definition=s
+                    )
+                    newd.save()
+        except:
+            print(f"Error {l['cf']}, {oid}: senses")
 
-            newb = LemmaSpelling(
-                lemma=newl,
-                spelling_lat=b
-            )
+        try:
+            for base in l["bases"]:
+                b = base["n"]
+                b = re.sub(r"%sux:", "", b) 
 
-            newb.save()
+                newb = LemmaSpelling(
+                    lemma=newl,
+                    spelling_lat=b
+                )
+
+                newb.save()
+        except:
+            print(f"Error {l['cf']}, {oid}: bases")
+
 
 
 class Migration(migrations.Migration):

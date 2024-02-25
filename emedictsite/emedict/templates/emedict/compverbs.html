@@ -1,0 +1,12 @@
+<ul>
+    {% for lem in shu %}
+    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{lem.cf}}</a></li>
+    {% endfor %}
+</ul>
+
+
+<ul>
+    {% for lem in lemmalist %}
+    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{lem.cf}}</a></li>
+    {% endfor %}
+</ul>

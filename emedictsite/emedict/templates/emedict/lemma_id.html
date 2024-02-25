@@ -1,24 +1,35 @@
 {% if lemma %}
-<h1>{{ lemma.cf }}</h1>
-<p><a href="{% url 'emedict:lemma_home' %}">Home</a></p>
-<p>{{ lemma.cf }} ({{ lemma.pos }}): <a href="http://oracc.iaas.upenn.edu/epsd2/cbd/sux/{{oid}}.html">{{oid}}</a></p>
+<h1>{{ lemma.cf }}{% if lemma.lemmaspelling_set.first.spelling_cun %} ({{lemma.lemmaspelling_set.first.spelling_cun}}) {% endif %}</h1>
+<p><a href="{% url 'emedict:lemma_home' %}">Home</a> | <a href="http://127.0.0.1:8000/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a></p>
+<p>{{ lemma.cf }} ({{ lemma.pos }}): 
+    {% for oid in lemma.lemmaoid_set.all %} 
+    <a href="http://oracc.iaas.upenn.edu/epsd2/cbd/sux/{{oid}}.html">{{oid}}</a>
+    {% endfor %}
+</p>
+{% if lemma.components.all %}
+Components: 
+{% for comp in lemma.components.all %}
+<a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}),
+{% endfor %}
+{% endif %}
 <h2>Definitions</h2>
 <ul>
     {% for d in lemma.lemmadef_set.all %}
     <li>{{ d.definition }}</li>
     {% endfor %}
 </ul>
-<form>
-    {{ adddef }}
-    <input type="submit" value="Add Definition">
-</form>
+
+{% if lemma.notes %}
+<p>Notes: {{lemma.notes}}</p>
+{% endif %}
 
 <h2>Spellings</h2>
 <ul>
     {% for s in lemma.lemmaspelling_set.all %}
-    <li>{{ s.spelling_lat }}</li>
+    <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %}</li>
     {% endfor %}
 </ul>
+
 {% if lemma.lemmatag_set.all %}
 <h2>Tags</h2>
 <ul>
@@ -28,17 +39,14 @@
 </ul>
 {% endif %}
 
-<form action="{% url 'emedict:lpos' lemma.pk %}" method="post">
-    {% csrf_token %}
-    <fieldset>
-        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-        {% for choice in lemma.POS %}
-        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice }}">
-        <label for="choice{{ forloop.counter }}">{{ choice }}</label><br>
-        {% endfor %}
-    </fieldset>
-    <input type="submit" value="Change POS">
-</form>
+{% if lemma.lemmacitation_set.all %}
+<h2>Citations</h2>
+<ul>
+    {% for cite in lemma.lemmacitation_set.all %}
+    <li>{{ cite.citation }} ({{ cite.source.title }})</li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% else %}
 <p>No lemmata are available.</p>
 {% endif %}

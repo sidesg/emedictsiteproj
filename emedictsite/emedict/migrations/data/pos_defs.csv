@@ -1,0 +1,28 @@
+abbr,term,type
+AJ,adjective,COM
+AV,adverb,COM
+CN,Celestial Name,PROP
+CNJ,conjunction,COM
+DN,Divine Name,PROP
+DP,demonstrative pronoun,COM
+EN,Ethnos Name,PROP
+FN,Field Name,PROP
+GN,Geographical Name,PROP
+IP,independent/anaphoric pronoun,COM
+J,interjection,COM
+LN,Line Name (ancestral clan),PROP
+MN,Month Name,PROP
+N,noun,COM
+NU,number,COM
+O,other,COM
+ON,Object Name,PROP
+PN,Personal Name,PROP
+QN,Quarter Name (city area),PROP
+QP,interrogative pronoun,COM
+RN,Royal Name,PROP
+RP,reflexive/reciprocal pronoun,COM
+SN,Settlement Name,PROP
+TN,Temple Name,PROP
+U,unknown,COM
+V,verb,COM
+WN,Watercourse Name,PROP
