@@ -6,7 +6,7 @@ import re
 import json
 import polars as pl
 
-def load_data(datapath: str = "emedict/migrations/data/gloss-sux-full.json") -> list[dict]:
+def load_data(datapath: str = "emedict/migrations/data/gloss-sux.json") -> list[dict]:
     with open(datapath, "r", encoding="utf8") as infile:
         data = json.load(infile)["entries"]
 
@@ -19,8 +19,11 @@ def load_posmap(datapath: str) -> dict:
 
 def add_data(apps, schema_editor):
     Lemma = apps.get_model("emedict", "Lemma")
+    LemmaOid = apps.get_model("emedict", "LemmaOid")
     LemmaDef = apps.get_model("emedict", "LemmaDef")
-    LemmaSpelling = apps.get_model("emedict", "LemmaSpelling")
+    Form = apps.get_model("emedict", "Form")
+    FormType = apps.get_model("emedict", "FormType")
+    Spelling = apps.get_model("emedict", "Spelling")
     Tag = apps.get_model("emedict", "Tag")
     Pos = apps.get_model("emedict", "Pos")
 
@@ -45,6 +48,14 @@ def add_data(apps, schema_editor):
 
         new_pos.save()
 
+    #Create FormTypes
+    formtype = pl.read_csv("emedict/migrations/data/formtypes.csv")
+    for ft in formtype["term"].to_list():
+        newft = FormType(
+            term=ft
+        )
+        newft.save()
+
     #Create Lemmata
     data = load_data()
     posmap = load_posmap("emedict/migrations/data/pos_map.csv")
@@ -52,15 +63,21 @@ def add_data(apps, schema_editor):
         oid = l.get('oid', "no oid")
         try:
             newl = Lemma(
-                oid=l.get("oid", "None"),
                 cf=l["cf"],
                 pos=Pos.objects.get(abbr=posmap.get(l["pos"], "O"))
             )
 
             newl.save()
+
+            newoid = LemmaOid(
+                lemma=newl,
+                oid=oid
+            )
+            newoid.save()
+            
         except:
             print(f"Error {l['cf']}, {oid}: oid/cf/pos")
-        
+
         try:
             if senses := l["senses"]:
                 for sense in senses:
@@ -72,14 +89,23 @@ def add_data(apps, schema_editor):
                     newd.save()
         except:
             print(f"Error {l['cf']}, {oid}: senses")
+        
+        try:
+            newform = Form(
+                lemma=newl,
+                cf=l["cf"]
+            )
+            newform.save()
+        except:
+            print(f"Error {l['cf']} {oid}: form")
 
         try:
             for base in l["bases"]:
                 b = base["n"]
                 b = re.sub(r"%sux:", "", b) 
 
-                newb = LemmaSpelling(
-                    lemma=newl,
+                newb = Spelling(
+                    form=newform,
                     spelling_lat=b
                 )
 
