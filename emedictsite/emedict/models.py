@@ -1,7 +1,9 @@
 from django.db import models
 
 class TxtSource(models.Model):
-    title = models.CharField(max_length=200)
+    abbr = models.CharField(max_length=200)
+    title = models.CharField(max_length=1000)
+    url = models.URLField(max_length=200, blank=True)
     notes = models.TextField(blank=True)
 
     def __str__(self) -> str:
@@ -36,6 +38,13 @@ class Tag(models.Model):
         return self.term
 
 class Lemma(models.Model):
+    STATUSES = {
+        "NR": "not reviewd",
+        "R": "reviewed",
+        "RD": "reviewed and documented"
+    }
+
+    status = models.CharField(choices=STATUSES, default="NR", max_length=5)
     cf = models.CharField(max_length=200)
     pos = models.ForeignKey(Pos, on_delete=models.CASCADE)
     notes = models.TextField(blank=True)
