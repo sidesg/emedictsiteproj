@@ -2,16 +2,18 @@
 {% block title %}Emedict: compound verbs{% endblock %}
 {% block content %}
 <a href="{% url 'emedict:index' %}">Home</a>
+
 <ul>
-    {% for lem in shu %}
-    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{lem.cf}}</a></li>
+    {% for lem in nouns %}
+    <li>
+        <a href="{% url 'emedict:compverbcomp' lem.pk %}">{{ lem }}</a> ({{ lem.form_set.first.spelling_set.first }}): {{ lem.lemmadef_set.first }}</li>
     {% endfor %}
 </ul>
 
 
 <ul>
-    {% for lem in lemmalist %}
-    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{lem.cf}}</a></li>
+    {% for lem in verbs %}
+    <li><a href="{% url 'emedict:compverbcomp' lem.pk %}">{{ lem }}</a> ({{ lem.form_set.first.spelling_set.first }}): {{ lem.lemmadef_set.first }}</li>
     {% endfor %}
 </ul>
 {% endblock %}

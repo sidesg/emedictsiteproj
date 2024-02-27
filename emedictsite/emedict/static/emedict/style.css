@@ -1,5 +1,5 @@
 p, li {
-    font-family: "Ungkam", Times, serif;;
+    font-family: "Ungkam", Times, serif;
 }
 
 #navbar {
@@ -24,6 +24,10 @@ p, li {
 
 #navbar li a:hover {
     background-color: #111;
+}
+
+#footer p {
+    text-align: center;
 }
 
 .floatcont {

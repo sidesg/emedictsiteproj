@@ -1,7 +1,7 @@
 from django.db import models
 
 class TxtSource(models.Model):
-    abbr = models.CharField(max_length=200)
+    abbr = models.CharField(max_length=200, blank=True)
     title = models.CharField(max_length=1000)
     url = models.URLField(max_length=200, blank=True)
     notes = models.TextField(blank=True)
@@ -18,7 +18,6 @@ class Pos(models.Model):
     term = models.CharField(max_length=50)
     type = models.CharField(max_length=5, choices=PTYPES)
     notes = models.TextField(blank=True)
-
 
     def __str__(self) -> str:
         return self.term
@@ -65,6 +64,9 @@ class LemmaCitation(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
     citation = models.CharField(max_length=1000)
     source = models.ForeignKey(TxtSource, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.citation
 
 class LemmaDef(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)

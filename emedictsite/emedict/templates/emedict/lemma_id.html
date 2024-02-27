@@ -6,7 +6,7 @@
 
 {% block content %}
 {% if lemma %}
-<h1>{{ lemma.cf }}
+<h1>{{ lemma.cf|title }}
     {% if lemma.form_set.first.spelling_set.first.spelling_cun %}
      ({{lemma.form_set.first.spelling_set.first.spelling_cun}}) 
     {% endif %}</h1>
