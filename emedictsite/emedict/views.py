@@ -25,7 +25,7 @@ class LemmaListView(generic.ListView):
     model = Lemma
     context_object_name = "lemmalist"
     template_name = "emedict/lemma_home.html"
-    queryset = Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("cf")
+    queryset = Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("sortform")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -44,7 +44,7 @@ def lemma_initial(request):
             request,
             "emedict/lemma_home.html",
             {
-                "lemmalist": Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("cf"),
+                "lemmalist": Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("sortform"),
                 "poslist": Lemma.POS,
             },
         )
@@ -53,13 +53,24 @@ def lemma_initial(request):
         LemmaListView.queryset = Lemma.objects.filter(
             Q(cf__startswith=sletter) | Q(cf__startswith=sletter.lower()),
             pos__type="COM"
-            ).order_by("cf")
+            ).order_by("sortform")
 
         return HttpResponseRedirect(reverse("emedict:lemma_home"))
     
 class LemmaIdView(generic.DetailView):
     model = Lemma
     template_name = "emedict/lemma_id.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        used_in = Lemma.objects.filter(
+            components__isnull=False,
+            components__pk=self.kwargs['pk']
+        )
+        context["used_in"] = used_in
+
+        return context    
 
 def tags(request):
     ctags = Tag.objects.filter(type="CO").order_by("term")
@@ -80,22 +91,22 @@ class CompVerbView(generic.ListView):
     model = Lemma
     queryset = Lemma.objects.filter(
         Q(pos__term="verb") & ~Q(components=None)
-    ).order_by("cf")
+    ).order_by("sortform")
 
     context_object_name = "lemmalist"
     template_name = "emedict/compverbs.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         verbs=Lemma.objects.filter(
                 lemma__in=self.queryset, pos__term='verb'
-            ).order_by('cf').distinct()
+            ).order_by('sortform').distinct()
         context["verbs"] = verbs
 
         nouns=Lemma.objects.filter(
                 lemma__in=self.queryset, pos__term='noun'
-            ).order_by('cf').distinct()
+            ).order_by('sortform').distinct()
         context["nouns"] = nouns
 
         return context
@@ -109,7 +120,7 @@ class CompVerbComponentView(generic.ListView):
         return Lemma.objects.filter(
             Q(pos__term="verb") 
             & Q(components__pk=self.kwargs['pk'])
-        ).order_by("cf")
+        ).order_by("sortform")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

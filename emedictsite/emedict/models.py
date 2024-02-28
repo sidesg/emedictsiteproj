@@ -1,4 +1,5 @@
 from django.db import models
+import re
 
 class TxtSource(models.Model):
     abbr = models.CharField(max_length=200, blank=True)
@@ -43,12 +44,27 @@ class Lemma(models.Model):
         "RD": "reviewed and documented"
     }
 
+    SORTS = {
+        "ŋ": "gz",
+        "š": "sz",
+        "ř": "rz",
+        "ḫ": "hz"
+    }
+
     status = models.CharField(choices=STATUSES, default="NR", max_length=5)
     cf = models.CharField(max_length=200)
-    pos = models.ForeignKey(Pos, on_delete=models.CASCADE)
+    pos = models.ForeignKey(Pos, blank=True, null=True, on_delete=models.SET_NULL)
     notes = models.TextField(blank=True)
     tags = models.ManyToManyField(Tag, through="LemmaTag", blank=True)
     components = models.ManyToManyField("self", symmetrical=False, blank=True)
+    sortform = models.CharField(max_length=200)
+
+    def make_sortform(self) -> None:
+        sortform = self.cf
+        for source, target in self.SORTS.items():
+            sortform = re.sub(source, target, sortform)
+
+        self.sortform = sortform
 
     def __str__(self) -> str:
         return self.cf
