@@ -99,15 +99,13 @@ class CompVerbView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        verbs=Lemma.objects.filter(
+        context["verbs"] = Lemma.objects.filter(
                 lemma__in=self.queryset, pos__term='verb'
             ).order_by('sortform').distinct()
-        context["verbs"] = verbs
 
-        nouns=Lemma.objects.filter(
+        context["nouns"] = Lemma.objects.filter(
                 lemma__in=self.queryset, pos__term='noun'
             ).order_by('sortform').distinct()
-        context["nouns"] = nouns
 
         return context
 
@@ -124,6 +122,5 @@ class CompVerbComponentView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        baselem = Lemma.objects.get(pk=self.kwargs['pk'])
-        context["baselem"] = baselem
+        context["baselem"] = Lemma.objects.get(pk=self.kwargs['pk'])
         return context

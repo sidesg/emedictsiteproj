@@ -59,12 +59,15 @@ class Lemma(models.Model):
     components = models.ManyToManyField("self", symmetrical=False, blank=True)
     sortform = models.CharField(max_length=200)
 
-    def make_sortform(self) -> None:
+    def make_sortform(self) -> str:
         sortform = self.cf
         for source, target in self.SORTS.items():
             sortform = re.sub(source, target, sortform)
 
-        self.sortform = sortform
+        return sortform
+    
+    def update_sortform(self) -> None:
+        self.sortform = self.make_sortform()
 
     def __str__(self) -> str:
         return self.cf
