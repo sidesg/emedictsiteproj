@@ -1,21 +1,28 @@
-<p><a href="{% url 'emedict:index' %}">Home</a></p>
+{% extends "emedict/base.html" %}
+{% block title %}Emedict: tags{% endblock %}
+{% block content %}
+<h2>Content tags</h2>
 <ul>
     {% for tag in ctags %}
     <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
     {% endfor %}
 </ul>
+<h2>Grammar tags</h2>
 <ul>
     {% for tag in gtags %}
     <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
     {% endfor %}
 </ul>
+<h2>Source tags</h2>
 <ul>
     {% for tag in stags %}
     <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
     {% endfor %}
 </ul>
+<h2>Other word lists</h2>
 <ul>
     {% for tag in wtags %}
     <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
     {% endfor %}
 </ul>
+{% endblock %}

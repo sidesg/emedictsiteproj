@@ -1,5 +1,12 @@
+{% extends "emedict/base.html" %}
+
+{% block title %}
+    {% if tag %}Emedict: {{ tag.term }}{% endif %}
+{% endblock %}
+
+{% block content %}
 {% if tag %}
-<p><a href="{% url 'emedict:tags_home' %}">Home</a></p>
+<p><a href="{% url 'emedict:tags_home' %}">Tag categories</a></p>
 <h1>{{ tag.term }}</h1>
 <p>{{ tag.term }}: {{ tag.definition }}</p>
 
@@ -7,12 +14,12 @@
 <h2>Lemmata</h2>
 <ul>
     {% for l in lemmata %}
-    <li><a href="{% url 'emedict:lemma' l.pk %}">{{ l }}</a> ({{l.lemmaspelling_set.first.spelling_cun}} {{l.lemmaspelling_set.first.spelling_lat}}): {{ l.lemmadef_set.first }}</li>
+    <li><a href="{% url 'emedict:lemma' l.pk %}">{{ l }}</a> ({{l.form_set.first.spelling_set.first.spelling_cun}} {{l.form_set.first.spelling_set.first.spelling_lat}}): {{ l.lemmadef_set.first }}</li>
     {% endfor %}
 </ul>
 {% endif %}
 
 {% else %}
 <p>No tag are available.</p>
-
 {% endif %}
+{% endblock %}

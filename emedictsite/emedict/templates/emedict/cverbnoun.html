@@ -1,0 +1,41 @@
+{% extends "emedict/base.html" %}
+{% block title %}Emedict: compound verbs{% endblock %}
+{% block content %}
+<h2>Compound verbs: <a href="{% url 'emedict:lemma' baselem.pk %}">{{ baselem.cf }}</a></h2>
+<p>{{ baselem.pos|title }}: {{ baselem.lemmadef_set.first }}</p>
+<ul>
+    {% for lem in lemmalist %}
+    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{ lem }}</a>
+        {% if baselem.pos.term == "noun" %}
+        ({{ lem.form_set.first.spelling_set.first }}):
+        {{ lem.lemmadef_set.first }}
+        <ul>
+            {% for comp in lem.components.all %}{% if comp.pos.term == "verb" %}
+            <li>
+                <a href="{% url 'emedict:lemma' comp.pk %}">{{ comp }}</a>
+                ({{ comp.form_set.first.spelling_set.first }}):
+                {{ comp.lemmadef_set.first }}
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if baselem.pos.term == "verb" %}
+        ({{ lem.form_set.first.spelling_set.first }}):
+        {{ lem.lemmadef_set.first }}
+        <ul>
+            {% for comp in lem.components.all %}{% if comp.pos.term == "noun" %}
+            <li>
+                <a href="{% url 'emedict:lemma' comp.pk %}">{{ comp }}</a>
+                ({{ comp.form_set.first.spelling_set.first }}):
+                {{ comp.lemmadef_set.first }}
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

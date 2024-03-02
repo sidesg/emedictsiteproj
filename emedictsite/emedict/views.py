@@ -1,3 +1,5 @@
+from typing import Any
+from django.db.models.query import QuerySet
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
@@ -9,7 +11,7 @@ from .models import Lemma, Tag
 LETTERS = ["A", "B", "D", "E", "G", "Ŋ", "H", "Ḫ", "I", "K",
             "L", "M", "N", "P", "R", "Ř", "S", "Š", "T", "U", "Z"]
 
-class TagId(generic.DetailView):
+class TagIdView(generic.DetailView):
     model = Tag
     template_name = "emedict/tags_detail.html"
 
@@ -19,11 +21,11 @@ class TagId(generic.DetailView):
 
         return context
 
-class LemmaList(generic.ListView): 
+class LemmaListView(generic.ListView): 
     model = Lemma
     context_object_name = "lemmalist"
     template_name = "emedict/lemma_home.html"
-    queryset = Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("cf")
+    queryset = Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("sortform")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -34,9 +36,6 @@ class LemmaList(generic.ListView):
 def index(request):
     return render(request, "emedict/emedict.html")
 
-def lemma_filter(request):
-    return HttpResponse([i for i in request.POST.items()][1:])
-
 def lemma_initial(request):
     try:
         request.POST["letter"] in LETTERS
@@ -45,42 +44,33 @@ def lemma_initial(request):
             request,
             "emedict/lemma_home.html",
             {
-                "lemmalist": Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("cf"),
+                "lemmalist": Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("sortform"),
                 "poslist": Lemma.POS,
             },
         )
     else:
         sletter = request.POST["letter"]
-        LemmaList.queryset = Lemma.objects.filter(
+        LemmaListView.queryset = Lemma.objects.filter(
             Q(cf__startswith=sletter) | Q(cf__startswith=sletter.lower()),
             pos__type="COM"
-            ).order_by("cf")
+            ).order_by("sortform")
 
         return HttpResponseRedirect(reverse("emedict:lemma_home"))
     
-class LemmaId(generic.DetailView):
+class LemmaIdView(generic.DetailView):
     model = Lemma
     template_name = "emedict/lemma_id.html"
 
-def lpos(request, pk):
-    lemma = get_object_or_404(Lemma, pk=pk)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-    try:
-        Lemma.POS[request.POST["choice"]]
-    except:
-        return render(
-            request,
-            "emedict/lemma_id.html",
-            {
-                "lemma": lemma,
-                "error_message": "You didn't select a POS.",
-            },
+        used_in = Lemma.objects.filter(
+            components__isnull=False,
+            components__pk=self.kwargs['pk']
         )
-    else:
-        lemma.pos = request.POST["choice"]
-        lemma.save()
+        context["used_in"] = used_in
 
-        return HttpResponseRedirect(reverse("emedict:lemma", args=(lemma.oid,)))
+        return context    
 
 def tags(request):
     ctags = Tag.objects.filter(type="CO").order_by("term")
@@ -97,27 +87,40 @@ def tags(request):
 
     return render(request, "emedict/tags_home.html", context)
 
-class CompVerb(generic.ListView):
+class CompVerbView(generic.ListView):
     model = Lemma
     queryset = Lemma.objects.filter(
         Q(pos__term="verb") & ~Q(components=None)
-    )
+    ).order_by("sortform")
+
     context_object_name = "lemmalist"
     template_name = "emedict/compverbs.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        shu = Lemma.objects.filter(
-            Q(pos__term="verb") & Q(components__lemmaoid__oid="o0039506")
-        ).order_by("cf")
-        context["shu"] = shu
-        comps = Lemma.objects.filter(components__pos__term="verb").values_list("components")
-        verbs = [Lemma.objects.get(pk=l[0]) for l in comps]
-        verbs = set([l for l in verbs if l.pos.term == "verb"])
-        context["verbs"] = verbs
 
-        nouns = [Lemma.objects.get(pk=l[0]) for l in comps]
-        nouns = set([l for l in nouns if l.pos.term == "noun"])
-        context["nouns"] = nouns
+        context["verbs"] = Lemma.objects.filter(
+                lemma__in=self.queryset, pos__term='verb'
+            ).order_by('sortform').distinct()
 
+        context["nouns"] = Lemma.objects.filter(
+                lemma__in=self.queryset, pos__term='noun'
+            ).order_by('sortform').distinct()
+
+        return context
+
+class CompVerbComponentView(generic.ListView):
+    model = Lemma
+    context_object_name = "lemmalist"
+    template_name = "emedict/cverbnoun.html"
+
+    def get_queryset(self) -> QuerySet[Any]:
+        return Lemma.objects.filter(
+            Q(pos__term="verb") 
+            & Q(components__pk=self.kwargs['pk'])
+        ).order_by("sortform")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["baselem"] = Lemma.objects.get(pk=self.kwargs['pk'])
         return context
