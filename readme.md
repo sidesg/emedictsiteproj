@@ -6,11 +6,11 @@ Emedict is a dictionary of the Sumerian language; its main features are
     * For most parts of speech, only one uncategorized form is necessary. A noun like *ninda* will only have a single form.
     * For verbs, forms minimally represent ḫamtû and marû forms. Forms can have mutliple types to capture the distribution of more complex suppletive verbs such as ŋen/du/sub/ere or dug/e/di.
 
+To get started, run `install.sh`. This script will create a virtual environment for Python, install the necessary packages, and load the data into the site.
+
 Currently this web app is designed to be run locally, as it depends on the user being able to access the admin pages of each entry. Future versions will be made suitable to run on public servers.
 
-Initial lexicographical data come from the Electronic Pennsylvania Sumerian Dictionary (ePSD2; http://oracc.iaas.upenn.edu/epsd2/). A small sample dataset is included, but the full ePSD2 data can be downloaded from their open data website: http://oracc.iaas.upenn.edu/epsd2/json/index.html.
-
+Initial lexicographical data come from the Electronic Pennsylvania Sumerian Dictionary (ePSD2; http://oracc.iaas.upenn.edu/epsd2/). 
 ## TODO
-* Repair compound verbs with suppletive verbs
 * Oganize compound verbs by dropdown
 * Make some tests

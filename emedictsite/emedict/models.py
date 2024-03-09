@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 import re
 
 class TxtSource(models.Model):
@@ -60,7 +61,7 @@ class Lemma(models.Model):
     sortform = models.CharField(max_length=200)
 
     def make_sortform(self) -> str:
-        sortform = self.cf
+        sortform = self.cf.lower()
         for source, target in self.SORTS.items():
             sortform = re.sub(source, target, sortform)
 
@@ -68,6 +69,34 @@ class Lemma(models.Model):
     
     def update_sortform(self) -> None:
         self.sortform = self.make_sortform()
+
+    def change_h(self):
+        newcf = re.sub("h", "ḫ", self.cf)
+        newcf = re.sub("H", "Ḫ", newcf)
+
+        self.cf = newcf
+
+    def merge_lem(self, duplicate: "Lemma"):
+        for oid in duplicate.lemmaoid_set.filter(
+            ~Q(oid__in=self.lemmaoid_set.all())
+        ):
+            newoid = LemmaOid(
+                lemma=self,
+                oid=oid
+            )
+            newoid.save()
+
+        for form in duplicate.form_set.all():
+            form.lemma=self
+            form.save()
+
+        part_ofs = Lemma.objects.filter(components=duplicate)
+        for part_of in part_ofs:
+            part_of.components.add(self)
+            part_of.components.remove(duplicate)
+            part_of.save()
+       
+        # duplicate.delete()
 
     def __str__(self) -> str:
         return self.cf

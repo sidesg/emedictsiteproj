@@ -1,7 +1,7 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
@@ -17,7 +17,7 @@ class TagIdView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["lemmata"] = Lemma.objects.filter(tags__id=self.kwargs['pk'])
+        context["lemmata"] = Lemma.objects.filter(tags__id=self.kwargs['pk']).order_by("sortform")
 
         return context
 
@@ -67,16 +67,17 @@ class LemmaIdView(generic.DetailView):
         used_in = Lemma.objects.filter(
             components__isnull=False,
             components__pk=self.kwargs['pk']
-        )
+        ).order_by("cf")
         context["used_in"] = used_in
 
         return context    
 
 def tags(request):
-    ctags = Tag.objects.filter(type="CO").order_by("term")
-    gtags = Tag.objects.filter(type="GR").order_by("term")
-    stags = Tag.objects.filter(type="SO").order_by("term")
-    wtags = Tag.objects.filter(type="WL").order_by("term")
+    taggedlems = Lemma.objects.filter(tags__isnull=False)
+    ctags = Tag.objects.filter(type="CO", lemma__in=taggedlems).distinct().order_by("term")
+    gtags = Tag.objects.filter(type="GR", lemma__in=taggedlems).distinct().order_by("term")
+    stags = Tag.objects.filter(type="SO", lemma__in=taggedlems).distinct().order_by("term")
+    wtags = Tag.objects.filter(type="WL", lemma__in=taggedlems).distinct().order_by("term")
 
     context = {
         "ctags": ctags, 

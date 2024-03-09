@@ -41,8 +41,8 @@ Components:
 <h2>Forms</h2>
 {% for f in lemma.form_set.all %}
 <div class="leftfloat">
-<p><em>{{ f.cf }}</em>{% if f.formtype.all %}
-    ({% for type in f.formtype.all %}{{ type.term }}) 
+<p><em>{{ f.cf }}</em>{% if f.formtype.all %} - 
+    {% for type in f.formtype.all %}{{ type.term }}; 
     {% endfor %}{% endif %}</p>
 <ul>
     {% for s in f.spelling_set.all %}
@@ -58,7 +58,7 @@ Components:
 <h2>Tags</h2>
 <ul>
     {% for tag in lemma.lemmatag_set.all %}
-    <li><a href="{% url 'emedict:tag_id' tag.tag.id %}">{{ tag.tag }}</a> ({{ tag.tag.id }}) {{ tag.citation }}</li>
+    <li><a href="{% url 'emedict:tag_id' tag.tag.id %}">{{ tag.tag }}</a> {{ tag.citation }}</li>
     {% endfor %}
 </ul>
 </div>
