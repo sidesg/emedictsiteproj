@@ -1,8 +1,8 @@
 #!/bin/bash
+# Activate virtualenv and run Django server
 
 DIRECTORY=.venv
 
 source $DIRECTORY/bin/activate
-cd emedictsite
 
 python manage.py runserver
