@@ -1,6 +1,6 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
@@ -35,6 +35,19 @@ class LemmaListView(generic.ListView):
 
 def index(request):
     return render(request, "emedict/emedict.html")
+
+def lemma_json(request, pk):
+    data = Lemma.objects.get(pk=pk).make_jsonld()
+    return JsonResponse(data,safe = False) 
+
+def lemma_ttl(request, pk):
+    data = Lemma.objects.get(pk=pk).make_ttl()
+    response = HttpResponse(content_type='text/plain; charset=utf-8')  
+    response['Content-Disposition'] = f'filename="{pk}.ttl"'
+
+    response.write(data)
+
+    return response
 
 def lemma_initial(request):
     try:

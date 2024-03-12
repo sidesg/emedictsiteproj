@@ -11,7 +11,9 @@
      ({{lemma.form_set.first.spelling_set.first.spelling_cun}}) 
     {% endif %}</h1>
 
-<p><a href="http://127.0.0.1:8000/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a></p>
+<p><a href="http://127.0.0.1:8000/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a> 
+    | <a href="{% url 'emedict:lemma_json' lemma.pk %}">json-ld</a> 
+    | <a href="{% url 'emedict:lemma_ttl' lemma.pk %}">ttl</a></p>
 <p>{{ lemma.cf }} ({{ lemma.pos }}): 
     {% for oid in lemma.lemmaoid_set.all %} 
     <a href="http://oracc.iaas.upenn.edu/epsd2/cbd/sux/{{oid}}.html">{{oid}}</a>
