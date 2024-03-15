@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
 
-from .models import Lemma, Tag
+from .models import Lemma, Tag, FormType, Form
 
 LETTERS = ["A", "B", "D", "E", "G", "Ŋ", "H", "Ḫ", "I", "K",
             "L", "M", "N", "P", "R", "Ř", "S", "Š", "T", "U", "Z"]
@@ -73,15 +73,18 @@ def lemma_initial(request):
 class LemmaIdView(generic.DetailView):
     model = Lemma
     template_name = "emedict/lemma_id.html"
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         used_in = Lemma.objects.filter(
             components__isnull=False,
             components__pk=self.kwargs['pk']
-        ).order_by("cf")
+        ).order_by("sortform")
         context["used_in"] = used_in
+
+        emesal = FormType.objects.get(term="emesal")
+        context["emesal"] = emesal
 
         return context    
 
@@ -137,4 +140,20 @@ class CompVerbComponentView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["baselem"] = Lemma.objects.get(pk=self.kwargs['pk'])
+        return context
+
+class LemmaEmesalListView(generic.ListView):
+    model = Lemma
+    context_object_name = "lemmalist"
+    template_name = "emedict/lemesal.html"
+    queryset = Lemma.objects.filter(
+        pos__type="COM",
+        form__in=Form.objects.filter(formtype=12)
+                                    ).order_by("sortform")
+    # emesalform = Form.objects.get(formtype=12)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["letters"] = LETTERS
+
         return context

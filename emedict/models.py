@@ -156,7 +156,13 @@ class Lemma(models.Model):
         return g
     
     def make_jsonld(self):
-        return json.loads(self._make_rdf().serialize(format="json-ld"))
+        context = {
+            "lexinfo": "http://www.lexinfo.net/ontology/3.0/lexinfo#",
+            "ontolex": "http://www.w3.org/ns/lemon/ontolex#",
+            "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+        }
+        return json.loads(self._make_rdf().serialize(format="json-ld", context=context))
     
     def make_ttl(self) -> str:
         return self._make_rdf().serialize(format="ttl")

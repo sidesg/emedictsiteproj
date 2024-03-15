@@ -1,0 +1,17 @@
+{% extends "emedict/base.html" %}
+{% block title %}Emedict: lemmata{% endblock %}
+{% block content %}
+
+{% if lemmalist %}
+<h2>Lemmata with Emesal forms</h2>
+<ul>
+    {% for lemma in lemmalist %}
+    <li><a href="{% url 'emedict:lemma' lemma.pk %}">{{ lemma.cf }}</a> ({{lemma.pos}}, {{ lemma.form_set.first.spelling_set.first }}): {{ lemma.lemmadef_set.first }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<a href="{% url 'emedict:index' %}">Home</a>
+<p>No lemmata are available.</p>
+{% endif %}
+
+{% endblock %}
