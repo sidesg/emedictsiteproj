@@ -81,6 +81,22 @@ class Lemma(models.Model):
         self.cf = newcf
 
     def merge_lem(self, duplicate: "Lemma"):
+        own_components = self.components.count()
+        dup_components = duplicate.components.count()
+        
+        if own_components > 0 and dup_components > 0:
+            dup_cs = duplicate.components.all()
+            for own_c in self.components.all():
+                if own_c not in dup_cs:
+                    print("All lemma components must match to merge")
+                    exit()
+            print("All components match")
+        elif (own_components > 0 and dup_components == 0) or (own_components == 0 and dup_components > 0):
+            print("Cannot merge compound lemma with non-compound lemma")
+            exit()
+        elif own_components == 0 and dup_components == 0:
+            print("No components")
+
         for oid in duplicate.lemmaoid_set.filter(
             ~Q(oid__in=self.lemmaoid_set.all())
         ):
@@ -89,6 +105,10 @@ class Lemma(models.Model):
                 oid=oid
             )
             newoid.save()
+
+        for lemdef in duplicate.lemmadef_set.all():
+            lemdef.lemma=self
+            lemdef.save()
 
         for form in duplicate.form_set.all():
             form.lemma=self
@@ -130,12 +150,19 @@ class Lemma(models.Model):
         for form in self.form_set.all():
             formuri = BNode()
             g.add((lemuri, ONTOLEX.lexicalform, formuri))
+            g.add((formuri, RDF.type, ONTOLEX.Form))
             g.add((formuri, RDFS.label, Literal(form.cf)))
 
         return g
     
     def make_jsonld(self):
-        return json.loads(self._make_rdf().serialize(format="json-ld"))
+        context = {
+            "lexinfo": "http://www.lexinfo.net/ontology/3.0/lexinfo#",
+            "ontolex": "http://www.w3.org/ns/lemon/ontolex#",
+            "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+        }
+        return json.loads(self._make_rdf().serialize(format="json-ld", context=context))
     
     def make_ttl(self) -> str:
         return self._make_rdf().serialize(format="ttl")

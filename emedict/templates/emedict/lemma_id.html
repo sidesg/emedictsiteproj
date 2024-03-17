@@ -1,0 +1,105 @@
+{% extends "emedict/base.html" %}
+
+{% block title %}
+{% if lemma %}Emedict: {{lemma.cf}}{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if lemma %}
+<h1>{{ lemma.cf|title }}
+    {% if lemma.form_set.first.spelling_set.first.spelling_cun %}
+    ({{lemma.form_set.first.spelling_set.first.spelling_cun}})
+    {% endif %}</h1>
+
+<p><a href="http://127.0.0.1:8000/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a>
+    | <a href="{% url 'emedict:lemma_json' lemma.pk %}">json-ld</a>
+    | <a href="{% url 'emedict:lemma_ttl' lemma.pk %}">ttl</a></p>
+<p>{{ lemma.cf }} ({{ lemma.pos }}):
+    {% for oid in lemma.lemmaoid_set.all %}
+    <a href="http://oracc.iaas.upenn.edu/epsd2/cbd/sux/{{oid}}.html">{{oid}}</a>
+    {% endfor %}
+</p>
+
+{% if lemma.components.all %}
+Components:
+{% for comp in lemma.components.all %}
+<a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}),
+{% endfor %}
+{% endif %}
+
+<h2>Definitions</h2>
+<ul>
+    {% for d in lemma.lemmadef_set.all %}
+    <li>{{ d.definition }}</li>
+    {% endfor %}
+</ul>
+
+{% if lemma.notes %}
+<p>Notes: {{lemma.notes}}</p>
+{% endif %}
+
+<div class="floatcont">
+    <h2>Forms</h2>
+    {% for f in lemma.form_set.all %}
+    {% if emesal not in f.formtype.all %}
+    <div class="leftfloat">
+        <p><em>{{ f.cf }}</em>{% if f.formtype.all %} -
+            {% for type in f.formtype.all %}{{ type.term }};
+            {% endfor %}{% endif %}</p>
+        <ul>
+            {% for s in f.spelling_set.all %}
+            <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% for f in lemma.form_set.all %}
+    {% if emesal in f.formtype.all %}
+    <div class="leftfloat">
+        <p><em>{{ f.cf }}</em>{% if f.formtype.all %} -
+            {% for type in f.formtype.all %}{{ type.term }};
+            {% endfor %}{% endif %}</p>
+        <ul>
+            {% for s in f.spelling_set.all %}
+            <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% if lemma.lemmatag_set.all %}
+<div>
+    <h2>Tags</h2>
+    <ul>
+        {% for tag in lemma.lemmatag_set.all %}
+        <li><a href="{% url 'emedict:tag_id' tag.tag.id %}">{{ tag.tag }}</a> {{ tag.citation }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if lemma.lemmacitation_set.all %}
+<h2>Citations</h2>
+<ul>
+    {% for cite in lemma.lemmacitation_set.all %}
+    <li>{{ cite.citation }} ({{ cite.source.title }})</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% if used_in %}
+<h2>Used in</h2>
+<ul>
+    {% for lem in used_in %}
+    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{ lem.cf }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+{% else %}
+<p>No lemmata are available.</p>
+{% endif %}
+{% endblock %}
