@@ -14,7 +14,7 @@ class TxtSource(models.Model):
 
     def __str__(self) -> str:
         return self.title
-    
+
 class Pos(models.Model):
     PTYPES = {
         "COM": "Common",
@@ -38,7 +38,7 @@ class Tag(models.Model):
     term = models.CharField(max_length=200)
     type = models.CharField(choices=TAGTS, max_length=200)
     definition = models.TextField(blank=True)
-    
+
     def __str__(self) -> str:
         return self.term
 
@@ -70,7 +70,7 @@ class Lemma(models.Model):
             sortform = re.sub(source, target, sortform)
 
         return sortform
-    
+
     def update_sortform(self) -> None:
         self.sortform = self.make_sortform()
 
@@ -83,7 +83,7 @@ class Lemma(models.Model):
     def merge_lem(self, duplicate: "Lemma"):
         own_components = self.components.count()
         dup_components = duplicate.components.count()
-        
+
         if own_components > 0 and dup_components > 0:
             dup_cs = duplicate.components.all()
             for own_c in self.components.all():
@@ -119,9 +119,9 @@ class Lemma(models.Model):
             part_of.components.add(self)
             part_of.components.remove(duplicate)
             part_of.save()
-       
+
         # duplicate.delete()
-            
+
     def _make_rdf(self) -> Graph:
         ONTOLEX = Namespace("http://www.w3.org/ns/lemon/ontolex#")
         LEXINFO = Namespace("http://www.lexinfo.net/ontology/3.0/lexinfo#")
@@ -154,7 +154,7 @@ class Lemma(models.Model):
             g.add((formuri, RDFS.label, Literal(form.cf)))
 
         return g
-    
+
     def make_jsonld(self):
         context = {
             "lexinfo": "http://www.lexinfo.net/ontology/3.0/lexinfo#",
@@ -163,7 +163,7 @@ class Lemma(models.Model):
             "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
         }
         return json.loads(self._make_rdf().serialize(format="json-ld", context=context))
-    
+
     def make_ttl(self) -> str:
         return self._make_rdf().serialize(format="ttl")
 
@@ -191,7 +191,7 @@ class LemmaDef(models.Model):
 
     def __str__(self) -> str:
         return self.definition
-    
+
 class LemmaTag(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
@@ -200,7 +200,7 @@ class LemmaTag(models.Model):
 
     def __str__(self) -> str:
         return self.lemma.cf + ": " + self.tag.term
-    
+
 class FormType(models.Model):
     term = models.CharField(max_length=200)
     definition = models.TextField(blank=True)
@@ -212,14 +212,33 @@ class Form(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
     cf = models.CharField(max_length=200, blank=True)
     formtype = models.ManyToManyField(FormType, blank=True)
-    
+
     def __str__(self) -> str:
         return self.cf
+
+# class Sign(models.Model):
+#     transcription = models.CharField(max_length=200)
+#     cuneiform = models.CharField(max_length=10, blank=True)
+#     oid = models.CharField(max_length=10, blank=True)
+#     note = models.TextField(blank=True)
+
+#     def __str__(self):
+#         return self.transcription
+
+# class SignReading(models.Model):
+#     sign = models.ForeignKey(Sign, on_delete=models.CASCADE)
+#     reading = models.CharField(max_length=200)
+#     note = models.CharField(max_length=200, blank=True)
+
+#     def __str__(self):
+#         return self.reading
 
 class Spelling(models.Model):
     form = models.ForeignKey(Form, on_delete=models.CASCADE)
     spelling_lat = models.CharField(max_length=200)
     spelling_cun = models.CharField(max_length=200, blank=True)
+    # signs = models.ManyToManyField(Sign, blank=True)
+    note = models.CharField(max_length=200, blank=True)
 
     def __str__(self) -> str:
         return self.spelling_lat
