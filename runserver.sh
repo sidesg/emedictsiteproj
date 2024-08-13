@@ -3,6 +3,9 @@
 
 DIRECTORY=.venv
 
-source $DIRECTORY/bin/activate
+activate () {
+  . $DIRECTORY/bin/activate
+}
 
+activate
 python manage.py runserver
