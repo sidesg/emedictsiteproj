@@ -16,7 +16,7 @@
     | <a href="{% url 'emedict:lemma_ttl' lemma.pk %}">ttl</a></p>
 <p>{{ lemma.cf }} ({{ lemma.pos }}):
     {% for oid in lemma.lemmaoid_set.all %}
-    <a href="http://oracc.iaas.upenn.edu/epsd2/cbd/sux/{{oid}}.html">{{oid}}</a>
+    <a href="https://oracc.museum.upenn.edu/epsd2/sux/{{oid}}">{{oid}}</a>
     {% endfor %}
 </p>
 
