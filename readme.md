@@ -10,4 +10,4 @@ To get started, run `install.sh`. This script will create a virtual environment 
 
 Currently this web app is designed to be run locally, as it depends on the user being able to access the admin pages of each entry. Future versions will be made suitable to run on public servers.
 
-Initial lexicographical data come from the Electronic Pennsylvania Sumerian Dictionary (ePSD2; http://oracc.iaas.upenn.edu/epsd2/). 
+Initial lexicographical data come from the Electronic Pennsylvania Sumerian Dictionary (ePSD2; http://oracc.museum.upenn.edu/epsd2/).
