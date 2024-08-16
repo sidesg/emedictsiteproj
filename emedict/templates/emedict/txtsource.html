@@ -1,0 +1,23 @@
+{% extends "emedict/base.html" %}
+
+{% block title %}
+{% if txtsource %}Emedict: {{txtsource.abbr}}{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if txtsource %}
+
+<h1>{{ txtsource.title }}</h1>
+<p><a href="{{ txtsource.url }}">{{ txtsource.url }}</a></p>
+
+<ul>
+    {% for lem in lemmata %}
+    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{ lem }}</a></li>
+    {% endfor %}
+</ul>
+
+{% else %}
+<p>No source available.</p>
+
+{% endif %}
+{% endblock %}

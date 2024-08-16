@@ -1,0 +1,17 @@
+{% extends "emedict/base.html" %}
+{% block title %}Emedict: Source texts{% endblock %}
+{% block content %}
+
+{% if txtlist %}
+<h2>Souce texts</h2>
+<ul>
+    {% for txt in txtlist %}
+    <li><a href="{% url 'emedict:txtsource' txt.pk %}">{{ txt.title }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<a href="{% url 'emedict:index' %}">Home</a>
+<p>No source texts are available.</p>
+{% endif %}
+
+{% endblock %}

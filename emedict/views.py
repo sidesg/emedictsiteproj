@@ -6,10 +6,12 @@ from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
 
-from .models import Lemma, Tag, FormType, Form
+from .models import Lemma, Tag, FormType, Form, TxtSource
 
 LETTERS = ["A", "B", "D", "E", "G", "Ŋ", "H", "Ḫ", "I", "K",
             "L", "M", "N", "P", "R", "Ř", "S", "Š", "T", "U", "Z"]
+
+BASEURI = "http://127.0.0.1:8000"
 
 class TagIdView(generic.DetailView):
     model = Tag
@@ -76,15 +78,13 @@ class LemmaIdView(generic.DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        used_in = Lemma.objects.filter(
+        context["baseuri"] = BASEURI
+        context["used_in"] = Lemma.objects.filter(
             components__isnull=False,
             components__pk=self.kwargs['pk']
         ).order_by("sortform")
-        context["used_in"] = used_in
 
-        emesal = FormType.objects.get(term="emesal")
-        context["emesal"] = emesal
+        context["emesal"] = FormType.objects.get(term="emesal")
 
         return context    
 
@@ -157,3 +157,21 @@ class LemmaEmesalListView(generic.ListView):
         context["letters"] = LETTERS
 
         return context
+    
+class TxtSourceView(generic.DetailView):
+    model = TxtSource
+    template_name = "emedict/txtsource.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["lemmata"] = Lemma.objects.filter(
+            lemmacitation__source__pk=self.kwargs['pk']
+        ).order_by("sortform")
+
+        return context
+
+class TxtSourceListView(generic.ListView):
+    model = TxtSource
+    context_object_name = "txtlist"
+    template_name = "txtsource_list.html"

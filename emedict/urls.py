@@ -14,5 +14,7 @@ urlpatterns = [
     path("tags/", views.tags, name="tags_home"),
     path("tags/<int:pk>/", views.TagIdView.as_view(), name="tag_id"),
     path("compverbs/", views.CompVerbView.as_view(), name="comp_verbs"),
-    path("compverbs/<int:pk>/", views.CompVerbComponentView.as_view(), name="compverbcomp")
+    path("compverbs/<int:pk>/", views.CompVerbComponentView.as_view(), name="compverbcomp"),
+    path("txtsources/<int:pk>/", views.TxtSourceView.as_view(), name="txtsource"),
+    path("txtsources/", views.TxtSourceListView.as_view(), name="txtsource_list")
 ]

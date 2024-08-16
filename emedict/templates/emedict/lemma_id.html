@@ -11,7 +11,9 @@
     ({{lemma.form_set.first.spelling_set.first.spelling_cun}})
     {% endif %}</h1>
 
-<p><a href="http://127.0.0.1:8000/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a>
+<p>
+    <!-- <a href="http://127.0.0.1:8000/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a> -->
+    <a href="{{ baseuri }}/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a>
     | <a href="{% url 'emedict:lemma_json' lemma.pk %}">json-ld</a>
     | <a href="{% url 'emedict:lemma_ttl' lemma.pk %}">ttl</a></p>
 <p>{{ lemma.cf }} ({{ lemma.pos }}):
@@ -85,7 +87,7 @@ Components:
 <h2>Citations</h2>
 <ul>
     {% for cite in lemma.lemmacitation_set.all %}
-    <li>{{ cite.citation }} ({{ cite.source.title }})</li>
+    <li>{{ cite.citation }} (<a href="{% url 'emedict:txtsource' cite.source.id %}">{{ cite.source.title }}</a>)</li>
     {% endfor %}
 </ul>
 {% endif %}

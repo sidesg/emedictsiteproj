@@ -6,6 +6,8 @@ import re
 import json
 from rdflib import Graph, Literal, URIRef, RDF, RDFS, Namespace, BNode
 
+BASEURI = "http://127.0.0.1:8000"
+
 class TxtSource(models.Model):
     abbr = models.CharField(max_length=200, blank=True)
     title = models.CharField(max_length=1000)
@@ -130,7 +132,8 @@ class Lemma(models.Model):
         g.bind("ontolex", ONTOLEX)
         g.bind("lexinfo", LEXINFO)
 
-        lemuri = URIRef("http://127.0.0.1:8000" + reverse('emedict:lemma', kwargs={'pk': self.pk}))
+        # lemuri = URIRef("http://127.0.0.1:8000" + reverse('emedict:lemma', kwargs={'pk': self.pk}))
+        lemuri = URIRef(BASEURI + reverse('emedict:lemma', kwargs={'pk': self.pk}))
         if self.components.count() > 0:
             ltype = ONTOLEX.MultiwordExpression
         else:
