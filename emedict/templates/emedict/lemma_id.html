@@ -12,8 +12,7 @@
     {% endif %}</h1>
 
 <p>
-    <!-- <a href="http://127.0.0.1:8000/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a> -->
-    <a href="{{ baseuri }}/admin/emedict/lemma/{{lemma.pk}}/change">Edit</a>
+     <a href="{{ admin_edit }}">Edit</a>
     | <a href="{% url 'emedict:lemma_json' lemma.pk %}">json-ld</a>
     | <a href="{% url 'emedict:lemma_ttl' lemma.pk %}">ttl</a></p>
 <p>{{ lemma.cf }} ({{ lemma.pos }}):

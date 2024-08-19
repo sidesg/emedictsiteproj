@@ -1,12 +1,9 @@
 from django.db import models
 from django.db.models import Q
-from django.urls import reverse
 
 import re
 import json
 from rdflib import Graph, Literal, URIRef, RDF, RDFS, Namespace, BNode
-
-BASEURI = "http://127.0.0.1:8000"
 
 class TxtSource(models.Model):
     abbr = models.CharField(max_length=200, blank=True)
@@ -124,7 +121,7 @@ class Lemma(models.Model):
 
         # duplicate.delete()
 
-    def _make_rdf(self) -> Graph:
+    def _make_rdf(self, lem_uri) -> Graph:
         ONTOLEX = Namespace("http://www.w3.org/ns/lemon/ontolex#")
         LEXINFO = Namespace("http://www.lexinfo.net/ontology/3.0/lexinfo#")
 
@@ -132,8 +129,8 @@ class Lemma(models.Model):
         g.bind("ontolex", ONTOLEX)
         g.bind("lexinfo", LEXINFO)
 
-        # lemuri = URIRef("http://127.0.0.1:8000" + reverse('emedict:lemma', kwargs={'pk': self.pk}))
-        lemuri = URIRef(BASEURI + reverse('emedict:lemma', kwargs={'pk': self.pk}))
+        lemuri = URIRef(lem_uri)
+
         if self.components.count() > 0:
             ltype = ONTOLEX.MultiwordExpression
         else:
@@ -158,17 +155,17 @@ class Lemma(models.Model):
 
         return g
 
-    def make_jsonld(self):
+    def make_jsonld(self, lem_uri):
         context = {
             "lexinfo": "http://www.lexinfo.net/ontology/3.0/lexinfo#",
             "ontolex": "http://www.w3.org/ns/lemon/ontolex#",
             "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
             "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
         }
-        return json.loads(self._make_rdf().serialize(format="json-ld", context=context))
+        return json.loads(self._make_rdf(lem_uri).serialize(format="json-ld", context=context))
 
-    def make_ttl(self) -> str:
-        return self._make_rdf().serialize(format="ttl")
+    def make_ttl(self, lem_uri) -> str:
+        return self._make_rdf(lem_uri).serialize(format="ttl")
 
     def __str__(self) -> str:
         return self.cf

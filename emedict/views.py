@@ -11,8 +11,6 @@ from .models import Lemma, Tag, FormType, Form, TxtSource
 LETTERS = ["A", "B", "D", "E", "G", "Ŋ", "H", "Ḫ", "I", "K",
             "L", "M", "N", "P", "R", "Ř", "S", "Š", "T", "U", "Z"]
 
-BASEURI = "http://127.0.0.1:8000"
-
 class TagIdView(generic.DetailView):
     model = Tag
     template_name = "emedict/tags_detail.html"
@@ -39,11 +37,15 @@ def index(request):
     return render(request, "emedict/emedict.html")
 
 def lemma_json(request, pk):
-    data = Lemma.objects.get(pk=pk).make_jsonld()
+    lem = Lemma.objects.get(pk=pk)
+    lem_uri = request.build_absolute_uri(lem.pk)
+    data = lem.make_jsonld(lem_uri)
     return JsonResponse(data,safe = False) 
 
 def lemma_ttl(request, pk):
-    data = Lemma.objects.get(pk=pk).make_ttl()
+    lem = Lemma.objects.get(pk=pk)
+    lem_uri = request.build_absolute_uri(lem.pk)
+    data = lem.make_ttl(lem_uri)
     response = HttpResponse(content_type='text/plain; charset=utf-8')  
     response['Content-Disposition'] = f'filename="{pk}.ttl"'
 
@@ -78,12 +80,12 @@ class LemmaIdView(generic.DetailView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["baseuri"] = BASEURI
         context["used_in"] = Lemma.objects.filter(
             components__isnull=False,
             components__pk=self.kwargs['pk']
         ).order_by("sortform")
-
+        context["admin_edit"] = reverse(
+            "admin:emedict_lemma_change", args=(self.kwargs["pk"],))
         context["emesal"] = FormType.objects.get(term="emesal")
 
         return context    
