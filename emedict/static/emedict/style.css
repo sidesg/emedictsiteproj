@@ -41,3 +41,24 @@ p, li {
     margin-left: 25px;
     margin-right: 25px;
 }
+
+.wrapper {
+    display: flex;
+    justify-content: space-between;
+    height: auto;
+  }
+  
+  .main {
+    padding: 12px; 
+    width: 90%; 
+    height: auto; 
+  }
+  
+  .sidebar {
+    position: sticky;
+    top: 0px;
+    width: 300px;
+    height: 100vh;
+    padding: 20px;
+    overflow: hidden;
+  }

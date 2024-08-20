@@ -1,12 +1,13 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
 
-from .models import Lemma, Tag, FormType, Form, TxtSource
+from .forms import LemmaSearchForm
+from .models import Lemma, Tag, FormType, Form, TxtSource, Pos
 
 LETTERS = ["A", "B", "D", "E", "G", "Ŋ", "H", "Ḫ", "I", "K",
             "L", "M", "N", "P", "R", "Ř", "S", "Š", "T", "U", "Z"]
@@ -30,6 +31,13 @@ class LemmaListView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["letters"] = LETTERS
+        context["pos"] = Pos.objects.filter(
+            id__in=self.queryset.values("pos")
+        )
+        context["tags"] = Tag.objects.filter(
+            id__in=self.queryset.values("tags")
+        )
+        context["lem_search_form"] = LemmaSearchForm
 
         return context
 
@@ -53,7 +61,7 @@ def lemma_ttl(request, pk):
 
     return response
 
-def lemma_initial(request):
+def lemma_initial(request: HttpRequest):
     try:
         request.POST["letter"] in LETTERS
     except:
@@ -74,6 +82,22 @@ def lemma_initial(request):
 
         return HttpResponseRedirect(reverse("emedict:lemma_home"))
     
+def lemma_search(request):
+    if request.method == "POST":
+        lem_search_form = LemmaSearchForm(request.POST)
+
+        if lem_search_form.is_valid():
+            term = request.POST["searched_lemma"]
+            LemmaListView.queryset = Lemma.objects.filter(
+                Q(cf=term.lower()) | Q(cf=term.upper())
+            ).order_by("sortform")
+
+            return HttpResponseRedirect(reverse("emedict:lemma_home"))
+    else:
+        lem_search_form = LemmaSearchForm()
+
+    return render(request, "emedict/lemma_home.html", {"lem_search_form": lem_search_form})
+
 class LemmaIdView(generic.DetailView):
     model = Lemma
     template_name = "emedict/lemma_id.html"
