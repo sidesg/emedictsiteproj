@@ -1,5 +1,5 @@
 """
-ASGI config for emedictsite project.
+ASGI config for emedict project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

@@ -5,9 +5,8 @@ from . import views
 app_name = "emedict"
 urlpatterns = [
     path("", views.index, name="index"),
-    path("lemma/", views.LemmaListView.as_view(), name="lemma_home"),
-    path("lemma/letter/", views.lemma_initial, name="lemma_initial"),
-    path("lemma/search/", views.lemma_search, name="lemma_search"),
+    path("lemma", views.LemmaListView.as_view(), name="lemma_home"),
+    path("lemma/search", views.LemmaSearchView.as_view(), name="lemma_search"),
     path("lemma/<int:pk>/", views.LemmaIdView.as_view(), name="lemma"),
     path("lemma/<int:pk>.json", views.lemma_json, name="lemma_json"),
     path("lemma/<int:pk>.ttl", views.lemma_ttl, name="lemma_ttl"),

@@ -1,21 +1,14 @@
 {% extends "emedict/base.html" %}
-{% block title %}Emedict: lemmata{% endblock %}
+{% block title %}Emedict: lemma search{% endblock %}
 {% block content %}
 
 {% if lemmalist %}
-<form action="{% url 'emedict:lemma_initial' %}" method="post">
-    {% csrf_token %}
-    <fieldset>
-        {% for letter in letters %}
-        <input type="radio" name="letter" id="choice{{ letter }}" value="{{ letter }}">
-        <label for="choice{{ letter }}">{{ letter }}</label> |
-        {% endfor %}
-    </fieldset>
+<form action="{% url 'emedict:lemma_home' %}" method="get">
+    {{ form }}
     <input type="submit" value="Initial letter">
 </form>
 <br>
-<form action="{% url 'emedict:lemma_search' %}" method="post">
-    {% csrf_token %}
+<form action="" method="get">
     {{ lem_search_form }} <input type="submit" value="Submit">
 </form>
 <div class="wrapper" >
@@ -41,7 +34,7 @@
 </div>
 
 {% else %}
-<a href="{% url 'emedict:index' %}">Home</a>
+<a href="{% url 'emedict:index' %}"></a>
 <form action="{% url 'emedict:lemma_initial' %}" method="post">
     {% csrf_token %}
     <fieldset>
