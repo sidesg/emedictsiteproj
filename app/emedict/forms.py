@@ -27,7 +27,35 @@ class LemmaInitialLetterForm(forms.Form):
         ("U", "U"), 
         ("Z", "Z")] 
     initial = forms.ChoiceField(
-        widget=forms.RadioSelect,
+        widget=forms.RadioSelect(
+            attrs={"class": "lem_init"}
+        ),
         choices=LETTERS
     )
-    
+
+class FacetSideBarForm(forms.Form):
+    poss = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple(),
+        label='Pos', 
+        choices=[]
+    )
+    tags = forms.MultipleChoiceField(
+        required=False,
+        widget=forms.CheckboxSelectMultiple(),
+        label='Tags', 
+        choices=[]
+    )
+
+    def __init__(self, poss=None, tag_list=None, *args, **kwargs):
+        super(FacetSideBarForm, self).__init__(*args, **kwargs)
+        if poss:
+            self.fields['poss'].choices = [
+                (str(k), v)
+                for k, v in enumerate(poss)
+            ]
+        if tag_list:
+            self.fields['tags'].choices = [
+                (str(k), v)
+                for k, v in enumerate(tag_list)
+            ]

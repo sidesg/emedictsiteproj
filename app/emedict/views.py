@@ -1,16 +1,13 @@
 from typing import Any
 from django.db.models.query import QuerySet
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse, HttpRequest
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
 
-from .forms import LemmaSearchForm, LemmaInitialLetterForm
+from .forms import LemmaSearchForm, LemmaInitialLetterForm, FacetSideBarForm
 from .models import Lemma, Tag, FormType, Form, TxtSource, Pos
-
-LETTERS = ["A", "B", "D", "E", "G", "Ŋ", "H", "Ḫ", "I", "K",
-            "L", "M", "N", "P", "R", "Ř", "S", "Š", "T", "U", "Z"]
 
 class TagIdView(generic.DetailView):
     model = Tag
@@ -35,27 +32,25 @@ class LemmaListView(generic.FormView):
                 pos__type="COM"
             ).order_by("sortform")
     
-        else:
-           self.lemmalist = Lemma.objects.filter(cf__startswith="a", pos__type="COM").order_by("sortform")
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["pos"] = Pos.objects.filter(
-            id__in=self.lemmalist.values("pos")
-        )
-        context["tags"] = Tag.objects.filter(
-            id__in=self.lemmalist.values("tags")
-        )
         context["lem_search_form"] = LemmaSearchForm
         context["lem_init_form"] = LemmaInitialLetterForm
+        context["sidebar_form"] = FacetSideBarForm
         context["lemmalist"] = self.lemmalist
+
+        if self.lemmalist:
+            context["sidebar_form"] = FacetSideBarForm(
+                Pos.objects.filter(id__in=self.lemmalist.values("pos")),
+                Tag.objects.filter(id__in=self.lemmalist.values("tags"))               
+            )
 
         return context
 
-class LemmaSearchView(generic.FormView):
+class LemmaSearchView(LemmaListView):
     template_name = "emedict/lemma_search.html"
-    lemmalist = None
 
     def get(self, request, *args, **kwargs):
         form = LemmaSearchForm(self.request.GET or None)
@@ -66,22 +61,6 @@ class LemmaSearchView(generic.FormView):
             ).order_by("sortform")
     
         return self.render_to_response(self.get_context_data(form=form))
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update({
-            "lemmalist": self.lemmalist,
-            "letters": LETTERS,
-            "lem_search_form": LemmaSearchForm,
-            "lem_init_form": LemmaInitialLetterForm,
-            "pos": Pos.objects.filter(
-                id__in=self.lemmalist.values("pos")
-            ),
-            "tags":Tag.objects.filter(
-                id__in=self.lemmalist.values("tags")
-            ),
-        })
-        return context
 
 def index(request):
     return render(request, "emedict/emedict.html")
@@ -185,7 +164,7 @@ class LemmaEmesalListView(generic.ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["letters"] = LETTERS
+        # context["letters"] = LETTERS
 
         return context
 

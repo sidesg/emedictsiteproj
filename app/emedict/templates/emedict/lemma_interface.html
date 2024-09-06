@@ -1,0 +1,36 @@
+{% extends "emedict/base.html" %}
+{% block title %}Emedict: lemmata{% endblock %}
+{% block content %}
+
+<form action="{% url 'emedict:lemma_home' %}" method="get">
+    {{ lem_init_form }}
+    <input type="submit" value="Submit">
+</form>
+<br>
+<form action="{% url 'emedict:lemma_search' %}" method="get">
+    {{ lem_search_form }} <input type="submit" value="Submit">
+</form>
+<div class="wrapper" >
+    <div class="sidebar">
+        <form action="" method="get">
+            {{ sidebar_form }}
+            <input type="submit" value="Filter">
+        </form>
+    </div>
+    {% if lemmalist %}
+    <div class="main">
+        {% block lem_main %}{% endblock %}
+    </div>
+</div>
+
+{% else %}
+    <div class="main">
+        <ul>
+            <p>No lemmata are available.</p>
+        </ul>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

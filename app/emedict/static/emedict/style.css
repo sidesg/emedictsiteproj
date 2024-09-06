@@ -46,19 +46,30 @@ p, li {
     display: flex;
     justify-content: space-between;
     height: auto;
-  }
+}
   
-  .main {
+.main {
     padding: 12px; 
     width: 90%; 
     height: auto; 
-  }
-  
-  .sidebar {
+}
+
+.sidebar {
     position: sticky;
     top: 0px;
     width: 300px;
     height: 100vh;
     padding: 20px;
     overflow: hidden;
+}
+
+.lem_init {
+    list-style-type: none;
+    margin: 5;
+    padding: 10;
+    overflow: hidden;
   }
+
+.lem_init label {
+    float: left;
+}
