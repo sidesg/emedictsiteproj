@@ -80,15 +80,22 @@ class Lemma(models.Model):
         self.cf = newcf
 
     def merge_lem(self, duplicate: "Lemma"):
+        """Merges oids, definitions, forms, and components (if any)
+        from ::duplicate:: into self. 
+        """
         own_components = self.components.count()
         dup_components = duplicate.components.count()
-
-        if own_components > 0 and dup_components > 0:
-            dup_cs = duplicate.components.all()
-            for own_c in self.components.all():
-                if own_c not in dup_cs:
-                    print("All lemma components must match to merge")
-                    exit()
+        if (own_components == dup_components) and (own_components > 0):
+            # dup_cs = duplicate.components.all()
+            # for own_c in self.components.all():
+            #     if own_c not in dup_cs:
+            #         print("All lemma components must match to merge")
+            #         exit()
+            dup_cs = set([c for c in duplicate.components.all()])
+            own_cs = set([c for c in self.components.all()])
+            if not own_cs == dup_cs:
+                print("All lemma components must match to merge")
+                exit()
             print("All components match")
         elif (own_components > 0 and dup_components == 0) or (own_components == 0 and dup_components > 0):
             print("Cannot merge compound lemma with non-compound lemma")
@@ -97,7 +104,7 @@ class Lemma(models.Model):
             print("No components")
 
         for oid in duplicate.lemmaoid_set.filter(
-            ~Q(oid__in=self.lemmaoid_set.all())
+            ~Q(oid__in=[e for e in self.lemmaoid_set.all()])
         ):
             newoid = LemmaOid(
                 lemma=self,
@@ -180,6 +187,9 @@ class LemmaOid(models.Model):
 class LemmaCitation(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
     citation = models.CharField(max_length=1000)
+    gloss = models.CharField(max_length=1000, blank=True)
+    trans = models.CharField(max_length=1000, blank=True)
+    lines = models.CharField(max_length=100, blank=True)
     source = models.ForeignKey(TxtSource, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self) -> str:

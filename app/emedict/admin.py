@@ -40,6 +40,7 @@ class CitationInline(admin.StackedInline):
 
 class LemmaAdmin(admin.ModelAdmin):
     inlines = [OidInline, DefInline, FormInline, TagInline, CitationInline]
+    filter_horizontal = ["components"]
 
 class FormAdmin(admin.ModelAdmin):
     inlines = [SpellingInline,]

@@ -37,7 +37,7 @@ class FacetSideBarForm(forms.Form):
     poss = forms.MultipleChoiceField(
         required=False,
         widget=forms.CheckboxSelectMultiple(),
-        label='Pos', 
+        label='Parts of speech', 
         choices=[]
     )
     tags = forms.MultipleChoiceField(
@@ -51,11 +51,11 @@ class FacetSideBarForm(forms.Form):
         super(FacetSideBarForm, self).__init__(*args, **kwargs)
         if poss:
             self.fields['poss'].choices = [
-                (str(k), v)
-                for k, v in enumerate(poss)
+                (pos, pos)
+                for pos in poss
             ]
         if tag_list:
             self.fields['tags'].choices = [
-                (str(k), v)
-                for k, v in enumerate(tag_list)
+                (tag, tag)
+                for tag in tag_list
             ]

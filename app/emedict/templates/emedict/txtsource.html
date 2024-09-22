@@ -9,6 +9,10 @@
 
 <h1>{{ txtsource.title }}</h1>
 <p><a href="{{ txtsource.url }}">{{ txtsource.url }}</a></p>
+{% if txtsource.notes %}
+<h2>Notes</h2>
+<p>{{ txtsource.notes }}</p>
+{% endif %}
 
 <ul>
     {% for lem in lemmata %}

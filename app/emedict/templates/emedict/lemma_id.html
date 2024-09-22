@@ -5,6 +5,14 @@
 {% endblock %}
 
 {% block content %}
+<form action="{% url 'emedict:lemma_home' %}" method="get">
+    {{ lem_init_form }}
+    <input type="submit" value="Submit">
+</form>
+<br>
+<form action="{% url 'emedict:lemma_search' %}" method="get">
+    {{ lem_search_form }} <input type="submit" value="Submit">
+</form>
 {% if lemma %}
 <h1>{{ lemma.cf|title }}
     {% if lemma.form_set.first.spelling_set.first.spelling_cun %}
@@ -84,11 +92,15 @@ Components:
 
 {% if lemma.lemmacitation_set.all %}
 <h2>Citations</h2>
+
+{% for cite in lemma.lemmacitation_set.all %}
 <ul>
-    {% for cite in lemma.lemmacitation_set.all %}
-    <li>{{ cite.citation }} (<a href="{% url 'emedict:txtsource' cite.source.id %}">{{ cite.source.title }}</a>)</li>
-    {% endfor %}
+    <li>{{ cite.citation }}</li>
+    {% if cite.gloss %}<li>{{ cite.gloss }}</li>{% endif %}
+    {% if cite.trans %}<li>{{ cite.trans }}</li>{% endif %}
+    <li>(<a href="{% url 'emedict:txtsource' cite.source.id %}">{{ cite.source.title }}</a>{% if cite.lines %}; {{ cite.lines }}{% endif %})</li>
 </ul>
+{% endfor %}
 {% endif %}
 
 {% if used_in %}

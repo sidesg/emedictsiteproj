@@ -56,9 +56,12 @@ class LemmaSearchView(LemmaListView):
         form = LemmaSearchForm(self.request.GET or None)
         if form.is_valid():
             term = request.GET["lemma"]
+            # TODO: convert sub nums to regular? (or just need to add elasticsearch?)
             self.lemmalist = Lemma.objects.filter(
                 Q(cf=term.lower()) | Q(cf=term.upper())
-            ).order_by("sortform")
+                | Q(sortform=term.lower())
+                | Q(form__spelling__spelling_lat=term.lower())
+            ).distinct().order_by("sortform")
     
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -95,6 +98,8 @@ class LemmaIdView(generic.DetailView):
         context["admin_edit"] = reverse(
             "admin:emedict_lemma_change", args=(self.kwargs["pk"],))
         context["emesal"] = FormType.objects.get(term="emesal")
+        context["lem_search_form"] = LemmaSearchForm
+        context["lem_init_form"] = LemmaInitialLetterForm
 
         return context
 
@@ -162,11 +167,10 @@ class LemmaEmesalListView(generic.ListView):
                                     ).order_by("sortform")
     # emesalform = Form.objects.get(formtype=12)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # context["letters"] = LETTERS
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
 
-        return context
+    #     return context
 
 class TxtSourceView(generic.DetailView):
     model = TxtSource
