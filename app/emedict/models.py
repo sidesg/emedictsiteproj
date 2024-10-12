@@ -173,9 +173,9 @@ class Lemma(models.Model):
 
     def make_ttl(self, lem_uri) -> str:
         return self._make_rdf(lem_uri).serialize(format="ttl")
-
+    
     def __str__(self) -> str:
-        return self.cf
+        return f"{self.cf} ({self.pk})"
 
 class LemmaOid(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
