@@ -1,5 +1,7 @@
-__pycache__
-db.sqlite3
 .DS_Store
-static/
+
+.env.prod
+.env.prod.db
+.env.prod.pga
+
 migrations
