@@ -1,20 +1,23 @@
 #!/bin/sh
 
-EXPATH=emedictdata.json.gz
+EXPATH=emedictdata.json
 
 # accept optional argument to overwrite expath
 
+cd app
 #Get if condition to work
-if [ -d "app/$EXPATH" ]; then
+if [ -d "$EXPATH" ]; then
     read -p "$EXPATH apready exists. Overwrite? [y/N] " confirm
         case "$confirm" in 
             [yY][eE][sS]|[yY])
-                docker-compose exec web python manage.py dumpdata emedict -o $EXPATH
+                docker-compose -f docker-compose.prod.yml exec web python manage.py dumpdata emedict > $EXPATH
+                gzip $EXPATH
                 ;;
             *)
                 exit 1
                 ;;
         esac
 else   
-    docker-compose exec web python manage.py dumpdata emedict -o $EXPATH
+    docker-compose -f docker-compose.prod.yml exec web python manage.py dumpdata emedict > $EXPATH 
+    gzip $EXPATH
 fi

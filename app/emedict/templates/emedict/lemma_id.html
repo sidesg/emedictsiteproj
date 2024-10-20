@@ -32,7 +32,9 @@
 {% if lemma.components.all %}
 Components:
 {% for comp in lemma.components.all %}
-<a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}),
+<ul>
+<li><a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}): {{comp.lemmadef_set.first}}</li>
+</ul>
 {% endfor %}
 {% endif %}
 
@@ -107,7 +109,7 @@ Components:
 <h2>Used in</h2>
 <ul>
     {% for lem in used_in %}
-    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{ lem.cf }}</a></li>
+    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{ lem.cf }}</a>: {{ lem.lemmadef_set.first }}</li>
     {% endfor %}
 </ul>
 {% endif %}

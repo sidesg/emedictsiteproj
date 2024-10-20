@@ -12,7 +12,7 @@
 </form>
 <div class="wrapper" >
     <div class="sidebar">
-        <form action="" method="get">
+        <form action="{% url 'emedict:facet_landing' %}" method="get">
             {{ sidebar_form }}
             <input type="submit" value="Filter">
         </form>

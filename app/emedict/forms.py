@@ -1,4 +1,5 @@
 from django import forms
+from .models import Pos, Tag
 
 class LemmaSearchForm(forms.Form):
     lemma = forms.CharField(label="Lemma search", max_length=100)
@@ -36,15 +37,15 @@ class LemmaInitialLetterForm(forms.Form):
 class FacetSideBarForm(forms.Form):
     poss = forms.MultipleChoiceField(
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.CheckboxSelectMultiple,
         label='Parts of speech', 
-        choices=[]
+        choices=list()
     )
     tags = forms.MultipleChoiceField(
         required=False,
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.CheckboxSelectMultiple,
         label='Tags', 
-        choices=[]
+        choices=list()
     )
 
     def __init__(self, poss=None, tag_list=None, *args, **kwargs):

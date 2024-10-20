@@ -25,15 +25,22 @@ class LemmaListView(generic.FormView):
 
     def get(self, request, *args, **kwargs):
         form = LemmaInitialLetterForm(self.request.GET or None)
+
         if form.is_valid():
             initial = request.GET["initial"]
             self.lemmalist = Lemma.objects.filter(
-                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()), 
+                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
                 pos__type="COM"
             ).order_by("sortform")
-    
-        return self.render_to_response(self.get_context_data(form=form))
 
+        else:
+            self.lemmalist = Lemma.objects.filter(
+                Q(cf__startswith="a") | Q(cf__startswith="A"), 
+                pos__type="COM"
+            ).order_by("sortform")
+
+        return self.render_to_response(self.get_context_data(form=form))
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["lem_search_form"] = LemmaSearchForm
@@ -48,6 +55,31 @@ class LemmaListView(generic.FormView):
             )
 
         return context
+    
+class LemmaFacetView(generic.FormView):
+    template_name = "emedict/facet_landing.html"
+
+    def get(self, request, *args, **kwargs):
+        form = FacetSideBarForm(self.request.GET or None)
+
+        self.poss = request.GET.getlist("poss", default=[p.term for p in Pos.objects.all()])
+        self.tags = request.GET.getlist("tags", default=[t.term for t in Tag.objects.all()])
+
+        self.lemmalist = Lemma.objects.filter(
+            Q(pos__term__in=self.poss)
+            & Q(tags__term__in=self.tags),
+            pos__type="COM"
+        ).distinct().order_by("sortform")
+
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["poss"] = self.poss
+        context["tags"] = self.tags
+        context["lemmalist"] = self.lemmalist
+
+        return context
 
 class LemmaSearchView(LemmaListView):
     template_name = "emedict/lemma_search.html"
@@ -60,7 +92,8 @@ class LemmaSearchView(LemmaListView):
             self.lemmalist = Lemma.objects.filter(
                 Q(cf=term.lower()) | Q(cf=term.upper())
                 | Q(sortform=term.lower())
-                | Q(form__spelling__spelling_lat=term.lower())
+                | Q(form__spelling__spelling_lat=term.lower(),
+                    pos__type="COM")
             ).distinct().order_by("sortform")
     
         return self.render_to_response(self.get_context_data(form=form))
