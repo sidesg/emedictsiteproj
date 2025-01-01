@@ -63,13 +63,20 @@ class LemmaFacetView(generic.FormView):
         form = FacetSideBarForm(self.request.GET or None)
 
         self.poss = request.GET.getlist("poss", default=[p.term for p in Pos.objects.all()])
-        self.tags = request.GET.getlist("tags", default=[t.term for t in Tag.objects.all()])
+        self.tags = request.GET.getlist("tags", default=None)
 
-        self.lemmalist = Lemma.objects.filter(
-            Q(pos__term__in=self.poss)
-            & Q(tags__term__in=self.tags),
-            pos__type="COM"
-        ).distinct().order_by("sortform")
+        if self.tags:
+            self.lemmalist = Lemma.objects.filter(
+                Q(pos__term__in=self.poss)
+                & Q(tags__term__in=self.tags),
+                pos__type="COM"
+            ).distinct().order_by("sortform")
+
+        else:
+             self.lemmalist = Lemma.objects.filter(
+                Q(pos__term__in=self.poss),
+                pos__type="COM"
+            ).distinct().order_by("sortform")
 
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -90,10 +97,10 @@ class LemmaSearchView(LemmaListView):
             term = request.GET["lemma"]
             # TODO: convert sub nums to regular? (or just need to add elasticsearch?)
             self.lemmalist = Lemma.objects.filter(
-                Q(cf=term.lower()) | Q(cf=term.upper())
-                | Q(sortform=term.lower())
-                | Q(form__spelling__spelling_lat=term.lower(),
-                    pos__type="COM")
+                (Q(cf__contains=term.lower()) | Q(cf__contains=term.upper())
+                | Q(sortform__contains=term.lower())
+                | Q(form__spelling__spelling_lat__contains=term.lower())
+                & Q(pos__type="COM"))
             ).distinct().order_by("sortform")
     
         return self.render_to_response(self.get_context_data(form=form))

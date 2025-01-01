@@ -86,11 +86,6 @@ class Lemma(models.Model):
         own_components = self.components.count()
         dup_components = duplicate.components.count()
         if (own_components == dup_components) and (own_components > 0):
-            # dup_cs = duplicate.components.all()
-            # for own_c in self.components.all():
-            #     if own_c not in dup_cs:
-            #         print("All lemma components must match to merge")
-            #         exit()
             dup_cs = set([c for c in duplicate.components.all()])
             own_cs = set([c for c in self.components.all()])
             if not own_cs == dup_cs:
