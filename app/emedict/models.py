@@ -191,7 +191,7 @@ class LemmaCitation(models.Model):
         return self.citation
 
 class LemmaDef(models.Model):
-    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
+    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE, related_name="definitions")
     definition = models.TextField()
 
     def __str__(self) -> str:
@@ -214,7 +214,7 @@ class FormType(models.Model):
         return self.term
 
 class Form(models.Model):
-    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
+    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE, related_name="forms")
     cf = models.CharField(max_length=200, blank=True)
     formtype = models.ManyToManyField(FormType, blank=True)
 
@@ -239,7 +239,7 @@ class Form(models.Model):
 #         return self.reading
 
 class Spelling(models.Model):
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name="spellings")
     spelling_lat = models.CharField(max_length=200)
     spelling_cun = models.CharField(max_length=200, blank=True)
     # signs = models.ManyToManyField(Sign, blank=True)

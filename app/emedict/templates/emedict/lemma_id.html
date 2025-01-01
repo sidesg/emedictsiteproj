@@ -15,8 +15,8 @@
 </form>
 {% if lemma %}
 <h1>{{ lemma.cf|title }}
-    {% if lemma.form_set.first.spelling_set.first.spelling_cun %}
-    ({{lemma.form_set.first.spelling_set.first.spelling_cun}})
+    {% if lemma.forms.first.spellings.first.spelling_cun %}
+    ({{lemma.forms.first.spellings.first.spelling_cun}})
     {% endif %}</h1>
 
 <p>
@@ -33,14 +33,14 @@
 Components:
 {% for comp in lemma.components.all %}
 <ul>
-<li><a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}): {{comp.lemmadef_set.first}}</li>
+<li><a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}): {{comp.definitions.first}}</li>
 </ul>
 {% endfor %}
 {% endif %}
 
 <h2>Definitions</h2>
 <ul>
-    {% for d in lemma.lemmadef_set.all %}
+    {% for d in lemma.definitions.all %}
     <li>{{ d.definition }}</li>
     {% endfor %}
 </ul>
@@ -51,28 +51,28 @@ Components:
 
 <div class="floatcont">
     <h2>Forms</h2>
-    {% for f in lemma.form_set.all %}
+    {% for f in lemma.forms.all %}
     {% if emesal not in f.formtype.all %}
     <div class="leftfloat">
         <p><em>{{ f.cf }}</em>{% if f.formtype.all %} -
             {% for type in f.formtype.all %}{{ type.term }};
             {% endfor %}{% endif %}</p>
         <ul>
-            {% for s in f.spelling_set.all %}
+            {% for s in f.spellings.all %}
             <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %} {% if s.note %} – {{ s.note }}{% endif %}</li>
             {% endfor %}
         </ul>
     </div>
     {% endif %}
     {% endfor %}
-    {% for f in lemma.form_set.all %}
+    {% for f in lemma.forms.all %}
     {% if emesal in f.formtype.all %}
     <div class="leftfloat">
         <p><em>{{ f.cf }}</em>{% if f.formtype.all %} -
             {% for type in f.formtype.all %}{{ type.term }};
             {% endfor %}{% endif %}</p>
         <ul>
-            {% for s in f.spelling_set.all %}
+            {% for s in f.spellings.all %}
             <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %} {% if s.note %} – {{ s.note }}{% endif %}</li>
             {% endfor %}
         </ul>
@@ -109,7 +109,7 @@ Components:
 <h2>Used in</h2>
 <ul>
     {% for lem in used_in %}
-    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{ lem.cf }}</a>: {{ lem.lemmadef_set.first }}</li>
+    <li><a href="{% url 'emedict:lemma' lem.pk %}">{{ lem.cf }}</a>: {{ lem.definitions.first }}</li>
     {% endfor %}
 </ul>
 {% endif %}

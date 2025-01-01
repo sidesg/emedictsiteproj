@@ -11,10 +11,4 @@ then
     echo "PostgreSQL started"
 fi
 
-# python manage.py flush
-# python manage.py makemigrations emedict
-# python manage.py migrate
-# python manage.py loaddata emedictdata.json.gz --app emedict
-# python manage.py collectstatic
-
 exec "$@"

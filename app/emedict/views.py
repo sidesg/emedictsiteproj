@@ -6,8 +6,11 @@ from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
 
+from rest_framework import viewsets
+
 from .forms import LemmaSearchForm, LemmaInitialLetterForm, FacetSideBarForm
 from .models import Lemma, Tag, FormType, Form, TxtSource, Pos
+from .serializers import LemmaSerializer
 
 class TagIdView(generic.DetailView):
     model = Tag
@@ -99,7 +102,7 @@ class LemmaSearchView(LemmaListView):
             self.lemmalist = Lemma.objects.filter(
                 (Q(cf__contains=term.lower()) | Q(cf__contains=term.upper())
                 | Q(sortform__contains=term.lower())
-                | Q(form__spelling__spelling_lat__contains=term.lower())
+                | Q(forms__spelling__spelling_lat__contains=term.lower())
                 & Q(pos__type="COM"))
             ).distinct().order_by("sortform")
     
@@ -203,7 +206,7 @@ class LemmaEmesalListView(generic.ListView):
     template_name = "emedict/lemesal.html"
     queryset = Lemma.objects.filter(
         pos__type="COM",
-        form__in=Form.objects.filter(formtype=12)
+        forms__in=Form.objects.filter(formtype=12)
                                     ).order_by("sortform")
     # emesalform = Form.objects.get(formtype=12)
 
@@ -229,3 +232,7 @@ class TxtSourceListView(generic.ListView):
     model = TxtSource
     context_object_name = "txtlist"
     template_name = "txtsource_list.html"
+
+class LemmaViewSetSerialized(viewsets.ModelViewSet):
+    serializer_class = LemmaSerializer
+    queryset = Lemma.objects.all()
