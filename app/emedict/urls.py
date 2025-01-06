@@ -23,5 +23,5 @@ urlpatterns = [
     path("txtsources/<int:pk>/", views.TxtSourceView.as_view(), name="txtsource"),
     path("txtsources/", views.TxtSourceListView.as_view(), name="txtsource_list"),
     path("lemma/facetlanding", views.LemmaFacetView.as_view(), name="facet_landing"),
-    path("api", include(router.urls), name="api")
+    path("api/", include(router.urls), name="api")
 ]

@@ -149,7 +149,7 @@ class Lemma(models.Model):
         g.add((lemuri, RDF.type, ltype))
         g.add((lemuri, RDFS.label, Literal(self.cf)))
 
-        for form in self.form_set.all():
+        for form in self.forms.all():
             formuri = BNode()
             g.add((lemuri, ONTOLEX.lexicalform, formuri))
             g.add((formuri, RDF.type, ONTOLEX.Form))

@@ -4,6 +4,18 @@ from .models import Pos, Tag
 class LemmaSearchForm(forms.Form):
     lemma = forms.CharField(label="Lemma search", max_length=100)
 
+class LemmaAdvancedSearchForm(forms.Form):
+    SEARCH_OPTIONS = [
+        ("lemma", "lemma"),
+        ("definition", "definition")
+    ]
+    search_term = forms.CharField(label="Search", max_length=100)
+    search_type = forms.CharField(
+        label="Search type",
+        widget=forms.Select(choices=SEARCH_OPTIONS)
+    )
+
+
 class LemmaInitialLetterForm(forms.Form):
     LETTERS = [
         ("A", "A"), 

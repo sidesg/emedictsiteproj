@@ -5,12 +5,14 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
+import elasticsearch_dsl as edsl
 
 from rest_framework import viewsets
 
-from .forms import LemmaSearchForm, LemmaInitialLetterForm, FacetSideBarForm
+from .forms import LemmaSearchForm, LemmaInitialLetterForm, FacetSideBarForm, LemmaAdvancedSearchForm
 from .models import Lemma, Tag, FormType, Form, TxtSource, Pos
 from .serializers import LemmaSerializer
+from .documents import LemmaDocument
 
 class TagIdView(generic.DetailView):
     model = Tag
@@ -46,7 +48,8 @@ class LemmaListView(generic.FormView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["lem_search_form"] = LemmaSearchForm
+        # context["lem_search_form"] = LemmaSearchForm
+        context["lem_search_form"] = LemmaAdvancedSearchForm
         context["lem_init_form"] = LemmaInitialLetterForm
         context["sidebar_form"] = FacetSideBarForm
         context["lemmalist"] = self.lemmalist
@@ -95,16 +98,30 @@ class LemmaSearchView(LemmaListView):
     template_name = "emedict/lemma_search.html"
 
     def get(self, request, *args, **kwargs):
-        form = LemmaSearchForm(self.request.GET or None)
+        form = LemmaAdvancedSearchForm(self.request.GET or None)
         if form.is_valid():
-            term = request.GET["lemma"]
-            # TODO: convert sub nums to regular? (or just need to add elasticsearch?)
-            self.lemmalist = Lemma.objects.filter(
-                (Q(cf__contains=term.lower()) | Q(cf__contains=term.upper())
-                | Q(sortform__contains=term.lower())
-                | Q(forms__spelling__spelling_lat__contains=term.lower())
-                & Q(pos__type="COM"))
-            ).distinct().order_by("sortform")
+            term = request.GET["search_term"]
+            match request.GET["search_type"]:
+                case "lemma":
+                    fields = [
+                        "cf", "forms.cf", "forms.spellings.spelling_lat", "sortform"
+                    ]
+                case "definition":
+                        fields = ["definitions.definition"]
+                case _:
+                    fields = [
+                        "cf", "forms.cf", "forms.spellings.spelling_lat", "sortform"
+                    ]
+            # TODO: convert sub nums to regular?
+            q = edsl.Q(
+                "multi_match",
+                query = term,
+                fields = fields,
+                fuzziness = "auto"
+            )
+            search = LemmaDocument.search().query(q)
+            qs: QuerySet = search.to_queryset()
+            self.lemmalist = qs.distinct().order_by("sortform")
     
         return self.render_to_response(self.get_context_data(form=form))
 
@@ -141,7 +158,7 @@ class LemmaIdView(generic.DetailView):
         context["admin_edit"] = reverse(
             "admin:emedict_lemma_change", args=(self.kwargs["pk"],))
         context["emesal"] = FormType.objects.get(term="emesal")
-        context["lem_search_form"] = LemmaSearchForm
+        context["lem_search_form"] = LemmaAdvancedSearchForm
         context["lem_init_form"] = LemmaInitialLetterForm
 
         return context
