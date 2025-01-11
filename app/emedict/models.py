@@ -107,11 +107,11 @@ class Lemma(models.Model):
             )
             newoid.save()
 
-        for lemdef in duplicate.lemmadef_set.all():
+        for lemdef in duplicate.definitions.all():
             lemdef.lemma=self
             lemdef.save()
 
-        for form in duplicate.form_set.all():
+        for form in duplicate.forms.all():
             form.lemma=self
             form.save()
 

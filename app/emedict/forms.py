@@ -1,5 +1,4 @@
 from django import forms
-from .models import Pos, Tag
 
 class LemmaSearchForm(forms.Form):
     lemma = forms.CharField(label="Lemma search", max_length=100)
