@@ -1,8 +1,13 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework import routers
 
 from . import views
 
 app_name = "emedict"
+
+router = routers.DefaultRouter()
+router.register(r"lemma", views.LemmaViewSetSerialized)
+
 urlpatterns = [
     path("", views.index, name="index"),
     path("lemma", views.LemmaListView.as_view(), name="lemma_home"),
@@ -17,5 +22,6 @@ urlpatterns = [
     path("compverbs/<int:pk>/", views.CompVerbComponentView.as_view(), name="compverbcomp"),
     path("txtsources/<int:pk>/", views.TxtSourceView.as_view(), name="txtsource"),
     path("txtsources/", views.TxtSourceListView.as_view(), name="txtsource_list"),
-    path("lemma/facetlanding", views.LemmaFacetView.as_view(), name="facet_landing")
+    path("lemma/facetlanding", views.LemmaFacetView.as_view(), name="facet_landing"),
+    path("api/", include(router.urls), name="api")
 ]

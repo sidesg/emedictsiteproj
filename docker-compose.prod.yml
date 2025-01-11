@@ -38,7 +38,19 @@ services:
     ports:
       - "8080:80"
 
+  elasticsearch:
+    image: elasticsearch:8.17.0
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    volumes:
+      - esdata_prod:/usr/share/elasticsearch/data
+
 volumes:
   postgres_data_prod:
   static_volume:
   data_pgadmin_prod:
+  esdata_prod:

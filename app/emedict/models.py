@@ -107,11 +107,11 @@ class Lemma(models.Model):
             )
             newoid.save()
 
-        for lemdef in duplicate.lemmadef_set.all():
+        for lemdef in duplicate.definitions.all():
             lemdef.lemma=self
             lemdef.save()
 
-        for form in duplicate.form_set.all():
+        for form in duplicate.forms.all():
             form.lemma=self
             form.save()
 
@@ -149,7 +149,7 @@ class Lemma(models.Model):
         g.add((lemuri, RDF.type, ltype))
         g.add((lemuri, RDFS.label, Literal(self.cf)))
 
-        for form in self.form_set.all():
+        for form in self.forms.all():
             formuri = BNode()
             g.add((lemuri, ONTOLEX.lexicalform, formuri))
             g.add((formuri, RDF.type, ONTOLEX.Form))
@@ -191,7 +191,7 @@ class LemmaCitation(models.Model):
         return self.citation
 
 class LemmaDef(models.Model):
-    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
+    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE, related_name="definitions")
     definition = models.TextField()
 
     def __str__(self) -> str:
@@ -214,7 +214,7 @@ class FormType(models.Model):
         return self.term
 
 class Form(models.Model):
-    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE)
+    lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE, related_name="forms")
     cf = models.CharField(max_length=200, blank=True)
     formtype = models.ManyToManyField(FormType, blank=True)
 
@@ -239,7 +239,7 @@ class Form(models.Model):
 #         return self.reading
 
 class Spelling(models.Model):
-    form = models.ForeignKey(Form, on_delete=models.CASCADE)
+    form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name="spellings")
     spelling_lat = models.CharField(max_length=200)
     spelling_cun = models.CharField(max_length=200, blank=True)
     # signs = models.ManyToManyField(Sign, blank=True)
