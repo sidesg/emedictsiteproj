@@ -9,7 +9,7 @@ import elasticsearch_dsl as edsl
 
 from rest_framework import viewsets
 
-from .forms import LemmaSearchForm, LemmaInitialLetterForm, FacetSideBarForm, LemmaAdvancedSearchForm
+from .forms import LemmaInitialLetterForm, FacetSideBarForm, LemmaAdvancedSearchForm
 from .models import Lemma, Tag, FormType, Form, TxtSource, Pos
 from .serializers import LemmaSerializer
 from .documents import LemmaDocument
@@ -27,12 +27,14 @@ class TagIdView(generic.DetailView):
 class LemmaListView(generic.FormView):
     template_name = "emedict/lemma_home.html"
     lemmalist = None
+    last_init = "A"
 
     def get(self, request, *args, **kwargs):
         form = LemmaInitialLetterForm(self.request.GET or None)
 
         if form.is_valid():
-            initial = request.GET["initial"]
+            initial = request.GET.get("initial", default="A")
+            self.last_init = initial
             self.lemmalist = Lemma.objects.filter(
                 Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
                 pos__type="COM"
@@ -48,31 +50,35 @@ class LemmaListView(generic.FormView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context["lem_search_form"] = LemmaSearchForm
         context["lem_search_form"] = LemmaAdvancedSearchForm
-        context["lem_init_form"] = LemmaInitialLetterForm
+        context["lem_init_form"] = LemmaInitialLetterForm(initial={"initial": self.last_init})
         context["sidebar_form"] = FacetSideBarForm
         context["lemmalist"] = self.lemmalist
 
         if self.lemmalist:
             context["sidebar_form"] = FacetSideBarForm(
                 Pos.objects.filter(id__in=self.lemmalist.values("pos")),
-                Tag.objects.filter(id__in=self.lemmalist.values("tags"))               
+                Tag.objects.filter(id__in=self.lemmalist.values("tags")),
+                initial={"initial": self.last_init}               
             )
 
         return context
     
 class LemmaFacetView(generic.FormView):
-    template_name = "emedict/facet_landing.html"
+    template_name = "emedict/lemma_home.html"
+    last_init = "A"
 
     def get(self, request, *args, **kwargs):
         form = FacetSideBarForm(self.request.GET or None)
 
         self.poss = request.GET.getlist("poss", default=[p.term for p in Pos.objects.all()])
         self.tags = request.GET.getlist("tags", default=None)
+        initial = request.GET.get("initial", default="A")
+        self.last_init = initial
 
         if self.tags:
             self.lemmalist = Lemma.objects.filter(
+                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
                 Q(pos__term__in=self.poss)
                 & Q(tags__term__in=self.tags),
                 pos__type="COM"
@@ -80,6 +86,7 @@ class LemmaFacetView(generic.FormView):
 
         else:
              self.lemmalist = Lemma.objects.filter(
+                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
                 Q(pos__term__in=self.poss),
                 pos__type="COM"
             ).distinct().order_by("sortform")
@@ -91,6 +98,16 @@ class LemmaFacetView(generic.FormView):
         context["poss"] = self.poss
         context["tags"] = self.tags
         context["lemmalist"] = self.lemmalist
+        context["lem_search_form"] = LemmaAdvancedSearchForm
+        context["lem_init_form"] = LemmaInitialLetterForm(initial={"initial": self.last_init})
+        context["sidebar_form"] = FacetSideBarForm
+
+        if self.lemmalist:
+            context["sidebar_form"] = FacetSideBarForm(
+                Pos.objects.filter(id__in=self.lemmalist.values("pos")),
+                Tag.objects.filter(id__in=self.lemmalist.values("tags")),
+                initial={"initial": self.last_init},                 
+            )
 
         return context
 

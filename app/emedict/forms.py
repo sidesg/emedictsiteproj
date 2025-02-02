@@ -1,7 +1,27 @@
 from django import forms
 
-class LemmaSearchForm(forms.Form):
-    lemma = forms.CharField(label="Lemma search", max_length=100)
+LETTERS = [
+    ("A", "A"), 
+    ("B", "B"), 
+    ("D", "D"), 
+    ("E", "E"), 
+    ("G", "G"), 
+    ("Ŋ", "Ŋ"), 
+    ("H", "H"), 
+    ("Ḫ", "Ḫ"), 
+    ("I", "I"), 
+    ("K", "K"),
+    ("L", "L"), 
+    ("M", "M"), 
+    ("N", "N"), 
+    ("P", "P"), 
+    ("R", "R"), 
+    ("Ř", "Ř"), 
+    ("S", "S"), 
+    ("Š", "Š"), 
+    ("T", "T"), 
+    ("U", "U"), 
+    ("Z", "Z")]
 
 class LemmaAdvancedSearchForm(forms.Form):
     SEARCH_OPTIONS = [
@@ -14,35 +34,12 @@ class LemmaAdvancedSearchForm(forms.Form):
         widget=forms.Select(choices=SEARCH_OPTIONS)
     )
 
-
 class LemmaInitialLetterForm(forms.Form):
-    LETTERS = [
-        ("A", "A"), 
-        ("B", "B"), 
-        ("D", "D"), 
-        ("E", "E"), 
-        ("G", "G"), 
-        ("Ŋ", "Ŋ"), 
-        ("H", "H"), 
-        ("Ḫ", "Ḫ"), 
-        ("I", "I"), 
-        ("K", "K"),
-        ("L", "L"), 
-        ("M", "M"), 
-        ("N", "N"), 
-        ("P", "P"), 
-        ("R", "R"), 
-        ("Ř", "Ř"), 
-        ("S", "S"), 
-        ("Š", "Š"), 
-        ("T", "T"), 
-        ("U", "U"), 
-        ("Z", "Z")] 
     initial = forms.ChoiceField(
         widget=forms.RadioSelect(
             attrs={"class": "lem_init"}
         ),
-        choices=LETTERS
+        choices=LETTERS,
     )
 
 class FacetSideBarForm(forms.Form):
@@ -58,6 +55,10 @@ class FacetSideBarForm(forms.Form):
         label='Tags', 
         choices=list()
     )
+    initial = forms.ChoiceField(
+        widget=forms.HiddenInput(),
+        choices=LETTERS,
+    )
 
     def __init__(self, poss=None, tag_list=None, *args, **kwargs):
         super(FacetSideBarForm, self).__init__(*args, **kwargs)
@@ -71,3 +72,4 @@ class FacetSideBarForm(forms.Form):
                 (tag, tag)
                 for tag in tag_list
             ]
+            
