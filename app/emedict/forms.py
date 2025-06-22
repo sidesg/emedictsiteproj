@@ -53,14 +53,14 @@ class FacetSideBarForm(forms.Form):
         required=False,
         widget=forms.CheckboxSelectMultiple,
         label='Tags', 
-        choices=list()
+        choices=list(),
     )
     initial = forms.ChoiceField(
         widget=forms.HiddenInput(),
         choices=LETTERS,
     )
 
-    def __init__(self, poss=None, tag_list=None, *args, **kwargs):
+    def __init__(self, poss=None, tag_list=None, tag_selection=None, *args, **kwargs):
         super(FacetSideBarForm, self).__init__(*args, **kwargs)
         if poss:
             self.fields['poss'].choices = [

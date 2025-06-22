@@ -42,4 +42,4 @@ class LemmaDocument(Document):
         elif isinstance(related_instance, LemmaDef):
             related_instance.lemma
         elif isinstance(related_instance, Form):
-            related_instance.lemma_set.all()
+            related_instance.lemma

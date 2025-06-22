@@ -26,7 +26,6 @@ class TagIdView(generic.DetailView):
 
 class LemmaListView(generic.FormView):
     template_name = "emedict/lemma_home.html"
-    lemmalist = None
     last_init = "A"
 
     def get(self, request, *args, **kwargs):
@@ -35,6 +34,7 @@ class LemmaListView(generic.FormView):
         if form.is_valid():
             initial = request.GET.get("initial", default="A")
             self.last_init = initial
+
             self.lemmalist = Lemma.objects.filter(
                 Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
                 pos__type="COM"
@@ -42,7 +42,7 @@ class LemmaListView(generic.FormView):
 
         else:
             self.lemmalist = Lemma.objects.filter(
-                Q(cf__startswith="a") | Q(cf__startswith="A"), 
+                Q(cf__startswith=self.last_init.lower()) | Q(cf__startswith=self.last_init.upper()), 
                 pos__type="COM"
             ).order_by("sortform")
 
@@ -59,7 +59,9 @@ class LemmaListView(generic.FormView):
             context["sidebar_form"] = FacetSideBarForm(
                 Pos.objects.filter(id__in=self.lemmalist.values("pos")),
                 Tag.objects.filter(id__in=self.lemmalist.values("tags")),
-                initial={"initial": self.last_init}               
+                initial={
+                    "initial": self.last_init,
+                }       
             )
 
         return context
@@ -74,6 +76,8 @@ class LemmaFacetView(generic.FormView):
         self.poss = request.GET.getlist("poss", default=[p.term for p in Pos.objects.all()])
         self.tags = request.GET.getlist("tags", default=None)
         initial = request.GET.get("initial", default="A")
+        self.tag_selection = request.GET.getlist("tags", default=list())
+        self.pos_selection = request.GET.getlist("poss", default=list())
         self.last_init = initial
 
         if self.tags:
@@ -106,7 +110,11 @@ class LemmaFacetView(generic.FormView):
             context["sidebar_form"] = FacetSideBarForm(
                 Pos.objects.filter(id__in=self.lemmalist.values("pos")),
                 Tag.objects.filter(id__in=self.lemmalist.values("tags")),
-                initial={"initial": self.last_init},                 
+                initial={
+                    "initial": self.last_init,
+                    "tags": self.tag_selection,
+                    "poss": self.pos_selection
+                },                 
             )
 
         return context
@@ -124,7 +132,7 @@ class LemmaSearchView(LemmaListView):
                         "cf", "forms.cf", "forms.spellings.spelling_lat", "sortform"
                     ]
                 case "definition":
-                        fields = ["definitions.definition"]
+                    fields = ["definitions.definition"]
                 case _:
                     fields = [
                         "cf", "forms.cf", "forms.spellings.spelling_lat", "sortform"

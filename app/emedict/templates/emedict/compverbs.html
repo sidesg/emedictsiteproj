@@ -8,7 +8,7 @@
         <ul>
             {% for lem in nouns %}
             <li>
-                <a href="{% url 'emedict:compverbcomp' lem.pk %}">{{ lem }}</a> 
+                <a href="{% url 'emedict:compverbcomp' lem.pk %}">{{ lem.cf }}</a> 
                     ({{ lem.forms.first.spellings.first }}): {{ lem.definitions.first }}
             </li>
             {% endfor %}
@@ -19,7 +19,7 @@
         <h2>By component verb</h2>
         <ul>
             {% for lem in verbs %}
-            <li><a href="{% url 'emedict:compverbcomp' lem.pk %}">{{ lem }}</a> 
+            <li><a href="{% url 'emedict:compverbcomp' lem.pk %}">{{ lem.cf }}</a> 
                 ({{ lem.forms.first.spellings.first }}): {{ lem.definitions.first }}</li>
             {% endfor %}
         </ul>
