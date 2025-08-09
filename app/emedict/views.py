@@ -194,12 +194,14 @@ def tags(request):
     gtags = Tag.objects.filter(type="GR", lemma__in=taggedlems).distinct().order_by("term")
     stags = Tag.objects.filter(type="SO", lemma__in=taggedlems).distinct().order_by("term")
     wtags = Tag.objects.filter(type="WL", lemma__in=taggedlems).distinct().order_by("term")
+    shtags = Tag.objects.filter(type="SH", lemma__in=taggedlems).distinct().order_by("term")
 
     context = {
         "ctags": ctags,
         "gtags": gtags,
         "stags": stags,
-        "wtags": wtags
+        "wtags": wtags,
+        "shtags": shtags
         }
 
     return render(request, "emedict/tags_home.html", context)

@@ -8,12 +8,14 @@ class LemmaDocument(Document):
     pos = fields.ObjectField(properties={
         "term": fields.TextField()
     })
-    definitions = fields.ObjectField(properties={
-        "definition": fields.TextField()
+    definitions = fields.NestedField(properties={
+        "definition": fields.TextField(
+            fields={'raw': fields.KeywordField()}
+        )
     }) 
-    forms = fields.ObjectField(properties={
+    forms = fields.NestedField(properties={
         "cf": fields.TextField(),
-        "spellings": fields.ObjectField(properties={
+        "spellings": fields.NestedField(properties={
             "spelling_lat": fields.TextField()
         })
     })
@@ -32,9 +34,19 @@ class LemmaDocument(Document):
             "id",
             "cf",
             "sortform",
-            "notes",
+            "notes"
         ]
-        related_models = [Pos, LemmaDef, Form, Spelling]
+        related_models = [
+            Pos, 
+            LemmaDef, 
+            Form, 
+            Spelling
+        ]
+
+    def get_queryset(self):
+        return super(LemmaDocument, self).get_queryset().select_related(
+            "pos",
+        )
 
     def get_instances_from_related(self, related_instance):
         if isinstance(related_instance, Pos):
@@ -43,3 +55,5 @@ class LemmaDocument(Document):
             related_instance.lemma
         elif isinstance(related_instance, Form):
             related_instance.lemma
+        elif isinstance(related_instance, Spelling):
+            related_instance.form.lemma

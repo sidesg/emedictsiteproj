@@ -2,8 +2,6 @@
 
 EXPATH=app/emedictdata.json
 
-# accept optional argument to overwrite expath
-
 if [ -f "$EXPATH.gz" ]; then
     read -p "$EXPATH.gz apready exists. Overwrite? [y/N] " confirm
         case "$confirm" in

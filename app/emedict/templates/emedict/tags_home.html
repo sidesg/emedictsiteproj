@@ -19,6 +19,12 @@
     <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
     {% endfor %}
 </ul>
+<h2>Sign shapes</h2>
+<ul>
+    {% for tag in shtags %}
+    <li><a href="{% url 'emedict:tag_id' tag.pk %}">{{ tag.term }}</a></li>
+    {% endfor %}
+</ul>
 <h2>Other word lists</h2>
 <ul>
     {% for tag in wtags %}

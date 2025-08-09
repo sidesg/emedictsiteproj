@@ -32,7 +32,8 @@ class Tag(models.Model):
         "GR": "Grammar",
         "CO": "Content",
         "SO": "Source",
-        "WL": "Word list"
+        "WL": "Word list",
+        "SH": "Sign Shape"
     }
     term = models.CharField(max_length=200)
     type = models.CharField(choices=TAGTS, max_length=200)
@@ -43,7 +44,7 @@ class Tag(models.Model):
 
 class Lemma(models.Model):
     STATUSES = {
-        "NR": "not reviewd",
+        "NR": "not reviewed",
         "R": "reviewed",
         "RD": "reviewed and documented"
     }
