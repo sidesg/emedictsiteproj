@@ -10,7 +10,8 @@ class LemmaDocument(Document):
     })
     definitions = fields.NestedField(properties={
         "definition": fields.TextField(
-            fields={'raw': fields.KeywordField()}
+            analyzer="standard",
+            index_phrases=True
         )
     }) 
     forms = fields.NestedField(properties={

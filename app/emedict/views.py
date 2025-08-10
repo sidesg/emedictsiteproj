@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
 from django.db.models import Q
+
 import elasticsearch_dsl as edsl
 
 from rest_framework import viewsets
@@ -129,21 +130,41 @@ class LemmaSearchView(LemmaListView):
             match request.GET["search_type"]:
                 case "lemma":
                     fields = [
-                        "cf", "forms.cf", "forms.spellings.spelling_lat", "sortform"
+                        "cf", "forms__cf", "forms.spellings__spelling_lat", "sortform"
                     ]
+                    q = edsl.Q(
+                        "multi_match",
+                        query = term,
+                        fields =  ["cf, sortform"],
+                        fuzziness = "auto"
+                    )
                 case "definition":
-                    fields = ["definitions.definition"]
+                    # fields = ["definitions__definition"]
+                    q = edsl.Q(
+                        "nested",
+                        path="definitions",
+                        query=edsl.Q(
+                            "match",
+                            definitions__definition=term
+                        )                      
+                    )
                 case _:
                     fields = [
-                        "cf", "forms.cf", "forms.spellings.spelling_lat", "sortform"
+                        "cf", "forms__cf", "forms__spellings__spelling_lat", "sortform"
                     ]
+                    q = edsl.Q(
+                        "multi_match",
+                        query = term,
+                        fields = fields,
+                        fuzziness = "auto"                       
+                    )
             # TODO: convert sub nums to regular?
-            q = edsl.Q(
-                "multi_match",
-                query = term,
-                fields = fields,
-                fuzziness = "auto"
-            )
+            # search = LemmaDocument.search().query(
+            #     "multi_match",
+            #     query = term,
+            #     fields = fields,
+            #     fuzziness = "auto"
+            # )
             search = LemmaDocument.search().query(q)
             qs: QuerySet = search.to_queryset()
             self.lemmalist = qs.distinct().order_by("sortform")
