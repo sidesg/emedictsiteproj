@@ -129,15 +129,38 @@ class LemmaSearchView(LemmaListView):
             term = request.GET["search_term"]
             match request.GET["search_type"]:
                 case "lemma":
-                    fields = [
-                        "cf", "forms__cf", "forms.spellings__spelling_lat", "sortform"
-                    ]
-                    q = edsl.Q(
-                        "multi_match",
-                        query = term,
-                        fields =  ["cf, sortform"],
-                        fuzziness = "auto"
+                    # fields = [
+                    #     "cf", "forms__cf", "forms.spellings__spelling_lat", "sortform"
+                    # ]
+                    q = (
+                        edsl.Q(
+                            "multi_match",
+                            query = term,
+                            fields =  ["cf, sortform"]
+                        ) |
+                        edsl.Q(
+                            "nested",
+                            path="forms",
+                            query=edsl.Q(
+                                "match",
+                                forms__cf=term
+                            )
+                        ) |
+                        edsl.Q(
+                            "nested",
+                            path="forms",
+                            query=edsl.Q(
+                                "nested",
+                                path="forms.spellings",
+                                query=edsl.Q(
+                                    "match",
+                                    forms__spellings__spelling_lat=term
+                                )
+                            )
+                        )
                     )
+
+                
                 case "definition":
                     # fields = ["definitions__definition"]
                     q = edsl.Q(
@@ -149,25 +172,38 @@ class LemmaSearchView(LemmaListView):
                         )                      
                     )
                 case _:
-                    fields = [
-                        "cf", "forms__cf", "forms__spellings__spelling_lat", "sortform"
-                    ]
-                    q = edsl.Q(
-                        "multi_match",
-                        query = term,
-                        fields = fields,
-                        fuzziness = "auto"                       
+                    q = (
+                        edsl.Q(
+                            "multi_match",
+                            query = term,
+                            fields =  ["cf, sortform"]
+                        ) |
+                        edsl.Q(
+                            "nested",
+                            path="forms",
+                            query=edsl.Q(
+                                "match",
+                                forms__cf=term
+                            )
+                        ) |
+                        edsl.Q(
+                            "nested",
+                            path="forms",
+                            query=edsl.Q(
+                                "nested",
+                                path="forms.spellings",
+                                query=edsl.Q(
+                                    "match",
+                                    forms__spellings__spelling_lat=term
+                                )
+                            )
+                        )
                     )
             # TODO: convert sub nums to regular?
-            # search = LemmaDocument.search().query(
-            #     "multi_match",
-            #     query = term,
-            #     fields = fields,
-            #     fuzziness = "auto"
-            # )
-            search = LemmaDocument.search().query(q)
+            search = LemmaDocument.search().extra(size=50).query(q)
             qs: QuerySet = search.to_queryset()
-            self.lemmalist = qs.distinct().order_by("sortform")
+            
+            self.lemmalist = qs.distinct()
     
         return self.render_to_response(self.get_context_data(form=form))
 

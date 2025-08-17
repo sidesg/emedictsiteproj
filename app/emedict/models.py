@@ -82,7 +82,7 @@ class Lemma(models.Model):
 
     def merge_lem(self, duplicate: "Lemma"):
         """Merges oids, definitions, forms, and components (if any)
-        from ::duplicate:: into self. 
+        from ::duplicate:: into self.
         """
         own_components = self.components.count()
         dup_components = duplicate.components.count()
@@ -169,7 +169,7 @@ class Lemma(models.Model):
 
     def make_ttl(self, lem_uri) -> str:
         return self._make_rdf(lem_uri).serialize(format="ttl")
-    
+
     def __str__(self) -> str:
         return f"{self.cf} ({self.pk})"
 

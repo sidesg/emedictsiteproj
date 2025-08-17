@@ -11,21 +11,26 @@ services:
   db:
     image: postgres:15
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      # - ${DOCKER_DATA}/postgres_data:/var/lib/postgresql/data/
+      - ./docker_data/postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=hello_django
       - POSTGRES_PASSWORD=hello_django
+    env_file:
+      - ./.env.dev
   pgadmin:
     image: dpage/pgadmin4
     volumes:
-      - data_pgadmin:/var/lib/pgadmin
+      - ./docker_data/data_pgadmin:/var/lib/pgadmin
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=root
     ports:
       - "8080:80"
+    env_file:
+      - ./.env.dev
   elasticsearch:
-    image: elasticsearch:9.1.0
+    image: elasticsearch:8.19.2
     ports:
       - 9200:9200
       - 9300:9300
@@ -33,9 +38,6 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
     volumes:
-      - esdata:/usr/share/elasticsearch/data
-
-volumes:
-  postgres_data:
-  data_pgadmin:
-  esdata:
+      - ./docker_data/esdata:/usr/share/elasticsearch/data
+    env_file:
+      - ./.env.dev
