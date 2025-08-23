@@ -1,4 +1,5 @@
 {% extends "emedict/base.html" %}
+{% load emedict_extras %}
 {% block title %}Emedict: lemmata{% endblock %}
 {% block content %}
 
@@ -20,6 +21,25 @@
     {% if lemmalist %}
     <div class="main">
         {% block lem_main %}{% endblock %}
+        {% if is_paginated %}
+        <div class="pagination">
+            <span class="step-links">
+                {% if lemmalist.has_previous %}
+                    <a href="?{% url_replace request 'page' 1 %}">&laquo; first</a>
+                    <a href="?{% url_replace request 'page' lemmalist.previous_page_number %}">previous</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ lemmalist.number }} of {{ lemmalist.paginator.num_pages }}.
+                </span>
+
+                {% if lemmalist.has_next %}
+                    <a href="?{% url_replace request 'page' lemmalist.next_page_number %}">next</a>
+                    <a href="?{% url_replace request 'page' lemmalist.paginator.num_pages %}">last &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+        {% endif %}
     </div>
 </div>
 

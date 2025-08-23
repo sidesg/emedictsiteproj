@@ -11,7 +11,6 @@ services:
   db:
     image: postgres:15
     volumes:
-      # - ${DOCKER_DATA}/postgres_data:/var/lib/postgresql/data/
       - ./docker_data/postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=hello_django

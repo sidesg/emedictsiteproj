@@ -23,11 +23,12 @@ LETTERS = [
     ("U", "U"), 
     ("Z", "Z")]
 
+SEARCH_OPTIONS = [
+    ("lemma", "lemma"),
+    ("definition", "definition")
+]
+
 class LemmaAdvancedSearchForm(forms.Form):
-    SEARCH_OPTIONS = [
-        ("lemma", "lemma"),
-        ("definition", "definition")
-    ]
     search_term = forms.CharField(label="Search", max_length=100)
     search_type = forms.CharField(
         label="Search type",
@@ -55,10 +56,6 @@ class FacetSideBarForm(forms.Form):
         label='Tags', 
         choices=list(),
     )
-    initial = forms.ChoiceField(
-        widget=forms.HiddenInput(),
-        choices=LETTERS,
-    )
 
     def __init__(self, poss=None, tag_list=None, tag_selection=None, *args, **kwargs):
         super(FacetSideBarForm, self).__init__(*args, **kwargs)
@@ -72,4 +69,19 @@ class FacetSideBarForm(forms.Form):
                 (tag, tag)
                 for tag in tag_list
             ]
+
+class LemmaFacetForm(FacetSideBarForm):
+    initial = forms.ChoiceField(
+        widget=forms.HiddenInput(),
+        choices=LETTERS,
+    )
+
+class SearchFacetForm(FacetSideBarForm):
+    search_term = forms.CharField(
+        widget=forms.HiddenInput()
+    )
+    search_type = forms.ChoiceField(
+        widget=forms.HiddenInput(),
+        choices=SEARCH_OPTIONS,
+    )
             
