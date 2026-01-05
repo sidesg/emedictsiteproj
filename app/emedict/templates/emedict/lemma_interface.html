@@ -4,7 +4,7 @@
 {% block content %}
 
 <form action="{% url 'emedict:lemma_home' %}" method="get">
-    {{ lem_init_form }}
+    {{ form }}
     <input type="submit" value="Submit">
 </form>
 <br>
@@ -13,7 +13,7 @@
 </form>
 <div class="wrapper" >
     <div class="sidebar">
-        <form action="{% url 'emedict:facet_landing' %}" method="get">
+        <form method="get">
             {{ sidebar_form }}
             <input type="submit" value="Filter">
         </form>
@@ -21,7 +21,6 @@
     {% if lemmalist %}
     <div class="main">
         {% block lem_main %}{% endblock %}
-        {% if is_paginated %}
         <div class="pagination">
             <span class="step-links">
                 {% if lemmalist.has_previous %}
@@ -39,7 +38,6 @@
                 {% endif %}
             </span>
         </div>
-        {% endif %}
     </div>
 </div>
 

@@ -22,6 +22,6 @@ urlpatterns = [
     path("compverbs/<int:pk>/", views.CompVerbComponentView.as_view(), name="compverbcomp"),
     path("txtsources/<int:pk>/", views.TxtSourceView.as_view(), name="txtsource"),
     path("txtsources/", views.TxtSourceListView.as_view(), name="txtsource_list"),
-    path("lemma/facetview", views.LemmaFacetView.as_view(), name="facet_landing"),
+    # path("lemma/facet", views.LemmaFacetView.as_view(), name="facet_landing"),
     path("api/", include(router.urls), name="api")
 ]
