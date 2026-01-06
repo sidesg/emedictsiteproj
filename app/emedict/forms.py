@@ -41,6 +41,7 @@ class LemmaInitialLetterForm(forms.Form):
             attrs={"class": "lem_init"}
         ),
         choices=LETTERS,
+        required=False
     )
 
 class FacetSideBarForm(forms.Form):
