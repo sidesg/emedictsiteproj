@@ -32,129 +32,85 @@ class TagIdView(generic.DetailView):
 
 class LemmaListView(generic.FormView):
     template_name = "emedict/lemma_home.html"
-    last_init = "A"
 
     def get(self, request, *args, **kwargs):
         form = LemmaInitialLetterForm(self.request.GET or None)
+        selected_poss = None
+        selected_tags = None
+        initial = "A"
+
+        #declare variables for initial landing on list page
+        query_set = Lemma.objects.filter(
+            Q(cf__startswith="A") | Q(cf__startswith="a"),
+            pos__type="COM"
+        ).order_by("sortform")
+
+        possible_poss = Pos.objects.filter(id__in=query_set.values("pos"))
+        possible_tags = Tag.objects.filter(id__in=query_set.values("tags"))
 
         if form.is_valid():
-            initial = request.GET.get("initial", default="A")
-            self.last_init = initial
+            initial = request.GET.get("initial", "A")
+            selected_poss = request.GET.getlist("poss")
+            selected_tags = request.GET.getlist("tags")
 
-            self.lemmalist = Lemma.objects.filter(
+            query_set = Lemma.objects.filter(
                 Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
                 pos__type="COM"
             ).order_by("sortform")
 
-        else:
-            self.lemmalist = Lemma.objects.filter(
-                Q(cf__startswith=self.last_init.lower()) | Q(cf__startswith=self.last_init.upper()), 
-                pos__type="COM"
-            ).order_by("sortform")
+            possible_poss = Pos.objects.filter(id__in=query_set.values("pos"), type="COM")
+            possible_tags = Tag.objects.filter(id__in=query_set.values("tags"))
 
-        return self.render_to_response(self.get_context_data(form=form))
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["lem_search_form"] = LemmaAdvancedSearchForm
-        context["lem_init_form"] = LemmaInitialLetterForm(initial={"initial": self.last_init})
-        context["sidebar_form"] = LemmaFacetForm
-        context["is_paginated"] = True
-        
-        paginator = Paginator(self.lemmalist, LEMMA_PAGINATION)
-        page = self.request.GET.get('page')
+            if selected_poss:
+                query_set = query_set.filter(
+                    Q(pos__term__in=selected_poss),
+                    pos__type="COM"
+                ).distinct().order_by("sortform")
+            if selected_tags:
+                query_set = query_set.filter(
+                    Q(tags__term__in=selected_tags),
+                    pos__type="COM"
+                )
+
+        paginator = Paginator(query_set, LEMMA_PAGINATION)
+        page = request.GET.get('page')
         try:
-            lemmalist = paginator.page(page)
+            query_set = paginator.page(page)
         except PageNotAnInteger:
-            lemmalist = paginator.page(1)
+            query_set = paginator.page(1)
         except EmptyPage:
-            lemmalist = paginator.page(paginator.num_pages)
-            
-        context['lemmalist'] = lemmalist
+            query_set = paginator.page(paginator.num_pages)
 
-        if self.lemmalist:
-            context["sidebar_form"] = LemmaFacetForm(
-                Pos.objects.filter(id__in=self.lemmalist.values("pos")),
-                Tag.objects.filter(id__in=self.lemmalist.values("tags")),
-                initial={
-                    "initial": self.last_init,
-                }       
-            )
+        facet_form = LemmaFacetForm(
+            possible_poss,
+            possible_tags,
+            initial={
+                "initial": initial if initial else "A",
+                "tags":selected_tags,
+                "poss":selected_poss
+            },
+        )
 
-        return context
-    
-class LemmaFacetView(generic.FormView):
-    template_name = "emedict/lemma_home.html"
-    last_init = "A"
+        return self.render_to_response(self.get_context_data(
+            form=form, 
+            lemmalist=query_set, 
+            sidebar_form=facet_form, 
+            lem_search_form=LemmaAdvancedSearchForm
+        ))
 
-    def get(self, request, *args, **kwargs):
-        form = LemmaFacetForm(self.request.GET or None)
-
-        self.poss = request.GET.getlist("poss", default=[p.term for p in Pos.objects.all()])
-        self.tags = request.GET.getlist("tags", default=None)
-        initial = request.GET.get("initial", default="A")
-        self.tag_selection = request.GET.getlist("tags", default=list())
-        self.pos_selection = request.GET.getlist("poss", default=list())
-        self.last_init = initial
-
-        if self.tags:
-            self.lemmalist = Lemma.objects.filter(
-                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
-                Q(pos__term__in=self.poss)
-                & Q(tags__term__in=self.tags),
-                pos__type="COM"
-            ).distinct().order_by("sortform")
-
-        else:
-             self.lemmalist = Lemma.objects.filter(
-                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
-                Q(pos__term__in=self.poss),
-                pos__type="COM"
-            ).distinct().order_by("sortform")
-
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["poss"] = self.poss
-        context["tags"] = self.tags
-        context["lem_search_form"] = LemmaAdvancedSearchForm
-        context["lem_init_form"] = LemmaInitialLetterForm(initial={"initial": self.last_init})
-        context["sidebar_form"] = LemmaFacetForm
-        context["is_paginated"] = True
-
-        paginator = Paginator(self.lemmalist, LEMMA_PAGINATION)
-        page = self.request.GET.get('page')
-        try:
-            lemmalist = paginator.page(page)
-        except PageNotAnInteger:
-            lemmalist = paginator.page(1)
-        except EmptyPage:
-            lemmalist = paginator.page(paginator.num_pages)
-            
-        context['lemmalist'] = lemmalist
-
-        if self.lemmalist:
-            context["sidebar_form"] = LemmaFacetForm(
-                Pos.objects.filter(id__in=self.lemmalist.values("pos")),
-                Tag.objects.filter(id__in=self.lemmalist.values("tags")),
-                initial={
-                    "initial": self.last_init,
-                    "tags": self.tag_selection,
-                    "poss": self.pos_selection
-                },                 
-            )
-
-        return context
-
-class LemmaSearchView(LemmaListView):
+class LemmaSearchView(generic.FormView):
     template_name = "emedict/lemma_search.html"
 
     def get(self, request, *args, **kwargs):
         form = LemmaAdvancedSearchForm(self.request.GET or None)
+
         if form.is_valid():
             term = request.GET["search_term"]
-            match request.GET["search_type"]:
+            term_type = request.GET["search_type"]
+            selected_poss = request.GET.getlist("poss", None)
+            selected_tags = request.GET.getlist("tags", None)
+
+            match term_type:
                 case "lemma":
                     # fields = [
                     #     "cf", "forms__cf", "forms.spellings__spelling_lat", "sortform"
@@ -226,74 +182,40 @@ class LemmaSearchView(LemmaListView):
                     )
             # TODO: convert sub nums to regular?
             search = LemmaDocument.search().extra(size=100).query(q)
-            qs: QuerySet = search.to_queryset()
+            query_set: QuerySet = search.to_queryset()
+            query_set = query_set.distinct()
             
-            self.lemmalist = qs.distinct()
-    
-        return self.render_to_response(self.get_context_data(form=form))
-    
-class LemmaSearchFacetView(generic.FormView):
-    template_name = "emedict/lemma_home.html"
-    last_init = "A"
+            possible_poss = Pos.objects.filter(id__in=query_set.values("pos"), type="COM")
+            possible_tags = Tag.objects.filter(id__in=query_set.values("tags"))
 
-    def get(self, request, *args, **kwargs):
-        form = SearchFacetForm(self.request.GET or None)
+            if selected_poss:
+                query_set = query_set.filter(
+                    Q(pos__term__in=selected_poss),
+                    pos__type="COM"
+                ).distinct().order_by("sortform")
+            if selected_tags:
+                query_set = query_set.filter(
+                    Q(tags__term__in=selected_tags),
+                    pos__type="COM"
+                )
 
-        self.poss = request.GET.getlist("poss", default=[p.term for p in Pos.objects.all()])
-        self.tags = request.GET.getlist("tags", default=None)
-        initial = request.GET.get("initial", default="A")
-        self.tag_selection = request.GET.getlist("tags", default=list())
-        self.pos_selection = request.GET.getlist("poss", default=list())
-        self.last_init = initial
-
-        if self.tags:
-            self.lemmalist = Lemma.objects.filter(
-                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
-                Q(pos__term__in=self.poss)
-                & Q(tags__term__in=self.tags),
-                pos__type="COM"
-            ).distinct().order_by("sortform")
-
-        else:
-             self.lemmalist = Lemma.objects.filter(
-                Q(cf__startswith=initial.lower()) | Q(cf__startswith=initial.upper()),
-                Q(pos__term__in=self.poss),
-                pos__type="COM"
-            ).distinct().order_by("sortform")
-
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["poss"] = self.poss
-        context["tags"] = self.tags
-        context["lem_search_form"] = LemmaAdvancedSearchForm
-        context["lem_init_form"] = LemmaInitialLetterForm(initial={"initial": self.last_init})
-        context["sidebar_form"] = LemmaFacetForm
-
-        paginator = Paginator(self.lemmalist, LEMMA_PAGINATION)
-        page = self.request.GET.get('page')
-        try:
-            lemmalist = paginator.page(page)
-        except PageNotAnInteger:
-            lemmalist = paginator.page(1)
-        except EmptyPage:
-            lemmalist = paginator.page(paginator.num_pages)
-            
-        context['lemmalist'] = lemmalist
-
-        if self.lemmalist:
-            context["sidebar_form"] = LemmaFacetForm(
-                Pos.objects.filter(id__in=self.lemmalist.values("pos")),
-                Tag.objects.filter(id__in=self.lemmalist.values("tags")),
+            facet_form = SearchFacetForm(
+                possible_poss,
+                possible_tags,
                 initial={
-                    "initial": self.last_init,
-                    "tags": self.tag_selection,
-                    "poss": self.pos_selection
-                },                 
+                    "search_term": term,
+                    "search_type":term_type,
+                    "tags":selected_tags,
+                    "poss":selected_poss
+                },
             )
-
-        return context
+    
+        return self.render_to_response(self.get_context_data(
+            lemmalist=query_set,
+            form=LemmaInitialLetterForm,
+            lem_search_form=form,
+            sidebar_form=facet_form
+        ))
 
 def index(request):
     return render(request, "emedict/emedict.html")
