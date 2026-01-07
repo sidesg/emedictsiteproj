@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 
-import elasticsearch_dsl as edsl
+import elasticsearch.dsl as edsl
 
 from rest_framework import viewsets
 

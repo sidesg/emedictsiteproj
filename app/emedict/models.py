@@ -64,6 +64,20 @@ class Lemma(models.Model):
     components = models.ManyToManyField("self", symmetrical=False, blank=True)
     sortform = models.CharField(max_length=200)
 
+    def base_spelling(self) -> "Spelling":
+        if baseform := Form.objects.filter(lemma=self, base=True).first():
+            return Spelling.objects.filter(form=baseform).first()
+        else:
+            firstform = Form.objects.filter(lemma=self).first()
+            return Spelling.objects.filter(form=firstform).first()
+
+    def emesal_spelling(self) -> "Spelling":
+        emeform = Form.objects.filter(lemma=self, formtype__term="emesal").first()
+        return Spelling.objects.filter(form=emeform).first()
+    
+    def emesal_form(self) -> "Form":
+        return Form.objects.filter(lemma=self, formtype__term="emesal").first()
+
     def make_sortform(self) -> str:
         sortform = self.cf.lower()
         for source, target in self.SORTS.items():
@@ -218,6 +232,7 @@ class Form(models.Model):
     lemma = models.ForeignKey(Lemma, on_delete=models.CASCADE, related_name="forms")
     cf = models.CharField(max_length=200, blank=True)
     formtype = models.ManyToManyField(FormType, blank=True)
+    base = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return self.cf

@@ -39,7 +39,7 @@ services:
       - "8080:80"
 
   elasticsearch:
-    image: elasticsearch:8.19.2
+    image: elasticsearch:9.2.3
     expose:
       - 9200
       - 9300
