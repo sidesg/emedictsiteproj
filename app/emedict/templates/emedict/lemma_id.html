@@ -20,9 +20,10 @@
     {% endif %}</h1>
 
 <p>
-     <a href="{{ admin_edit }}">Edit</a>
+    <a href="{{ admin_edit }}">Edit</a>
     | <a href="{% url 'emedict:lemma_json' lemma.pk %}">json-ld</a>
-    | <a href="{% url 'emedict:lemma_ttl' lemma.pk %}">ttl</a></p>
+    | <a href="{% url 'emedict:lemma_ttl' lemma.pk %}">ttl</a>
+</p>
 <p>{{ lemma.cf }} ({{ lemma.pos }}):
     {% for oid in lemma.lemmaoid_set.all %}
     <a href="https://oracc.museum.upenn.edu/epsd2/sux/{{oid}}">{{oid}}</a>
@@ -33,7 +34,7 @@
 Components:
 {% for comp in lemma.components.all %}
 <ul>
-<li><a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}): {{comp.definitions.first}}</li>
+    <li><a href="{% url 'emedict:lemma' comp.pk %}">{{comp.cf}}</a> ({{comp.pos}}): {{comp.definitions.first}}</li>
 </ul>
 {% endfor %}
 {% endif %}
@@ -59,7 +60,8 @@ Components:
             {% endfor %}{% endif %}</p>
         <ul>
             {% for s in f.spellings.all %}
-            <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %} {% if s.note %} – {{ s.note }}{% endif %}</li>
+            <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %} {% if s.note %} – {{ s.note
+                }}{% endif %}</li>
             {% endfor %}
         </ul>
     </div>
@@ -73,7 +75,8 @@ Components:
             {% endfor %}{% endif %}</p>
         <ul>
             {% for s in f.spellings.all %}
-            <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %} {% if s.note %} – {{ s.note }}{% endif %}</li>
+            <li>{{ s.spelling_lat }}{% if s.spelling_cun %}: {{s.spelling_cun}} {% endif %} {% if s.note %} – {{ s.note
+                }}{% endif %}</li>
             {% endfor %}
         </ul>
     </div>
@@ -100,7 +103,8 @@ Components:
     <li>{{ cite.citation }}</li>
     {% if cite.gloss %}<li>{{ cite.gloss }}</li>{% endif %}
     {% if cite.trans %}<li>{{ cite.trans }}</li>{% endif %}
-    <li>(<a href="{% url 'emedict:txtsource' cite.source.id %}">{{ cite.source.title }}</a>{% if cite.lines %}; {{ cite.lines }}{% endif %})</li>
+    <li>(<a href="{% url 'emedict:txtsource' cite.source.id %}">{{ cite.source.title }}</a>{% if cite.lines %}; {{
+        cite.lines }}{% endif %})</li>
 </ul>
 {% endfor %}
 {% endif %}
